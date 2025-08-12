@@ -20,6 +20,9 @@ export class User {
   @Column({ unique: true })
   email: string;
 
+   @Column()
+  password: string;
+  
   @Column({
     type: 'enum',
     enum: UserRole,
@@ -27,7 +30,5 @@ export class User {
   })
   role: UserRole;
 
-  // এখানে পাসওয়ার্ড এবং অন্যান্য ফিল্ড যোগ করতে পারেন
-  // @Column()
-  // password: string;
+   
 }

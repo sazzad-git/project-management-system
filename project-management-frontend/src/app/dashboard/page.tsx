@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../../store/store';
 import { fetchTasks } from '../../store/features/tasks/tasksSlice';
+import CreateTaskForm from '../../components/CreateTaskForm';
 
 const DashboardPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -44,7 +45,14 @@ const DashboardPage = () => {
   return (
     <div>
       <h1>Task Management Dashboard</h1>
-      {content}
+      
+      {/* নতুন টাস্ক তৈরির ফর্মটি এখানে যোগ করুন */}
+      <CreateTaskForm />
+
+      <hr style={{ margin: '20px 0' }} />
+
+      {/* আপনার টাস্ক লিস্ট দেখানোর কোড */}
+      {content} 
     </div>
   );
 };

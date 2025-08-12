@@ -1,0 +1,77 @@
+"use client"; // <--- এই লাইনটিই সমাধান! এটিকে ফাইলের একদম উপরে যোগ করুন।
+
+import { useState } from 'react';
+import { useDispatch } from 'react-redux'; // নিশ্চিত করুন যে এটি ইম্পোর্ট করা আছে
+import { useRouter } from 'next/navigation'; // Next 13+ এর জন্য useRouter
+import { loginSuccess } from '../../store/features/auth/authSlice'; // আপনার authSlice থেকে
+
+const LoginPage = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  const dispatch = useDispatch(); // এখন এটি সঠিকভাবে কাজ করবে
+  const router = useRouter();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    try {
+      const response = await fetch('http://localhost:3001/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Login failed');
+      }
+
+      const data = await response.json();
+      localStorage.setItem('token', data.access_token);
+      
+      // এখানে আপনাকে একটি প্রোফাইল এন্ডপয়েন্ট থেকে ইউজার তথ্য fetch করতে হবে
+      // এবং তারপর loginSuccess dispatch করতে হবে।
+      // আপাতত ডেমো ডেটা দিয়ে দেখাচ্ছি:
+      dispatch(loginSuccess({ token: data.access_token, user: { email } }));
+
+      router.push('/dashboard');
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <div>
+      <h1>Login</h1>
+      <form onSubmit={handleLogin}>
+        <div>
+          <label htmlFor="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Login</button>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+      </form>
+    </div>
+  );
+};
+
+export default LoginPage;

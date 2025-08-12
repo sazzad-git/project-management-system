@@ -1,11 +1,12 @@
-// src/app.module.ts (সঠিক সংস্করণ)
+// src/app.module.ts
 
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { TasksModule } from './tasks/tasks.module';
-import { User } from './users/entities/user.entity'; // ১. User এনটিটি ইম্পোর্ট করুন
+import { AuthModule } from './auth/auth.module'; // <-- AuthModule ইম্পোর্ট করা আছে (সঠিক)
+import { User } from './users/entities/user.entity';
 import { Task } from './tasks/entities/task.entity';
 
 @Module({
@@ -23,13 +24,15 @@ import { Task } from './tasks/entities/task.entity';
         username: configService.get<string>('DATABASE_USER'),
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
-        entities: [User, Task], // ২. এখানে User এবং Task উভয়ই যোগ করুন
+        entities: [User, Task],
         synchronize: true,
       }),
       inject: [ConfigService],
     }),
-    UsersModule, // UsersModule-কেও এখানে ইম্পোর্ট করতে হবে
+    // আপনার সমস্ত ফিচার মডিউল এখানে থাকবে
+    UsersModule,
     TasksModule,
+    AuthModule, // <-- AuthModule এখানে যোগ করা আছে (সঠিক)
   ],
   controllers: [],
   providers: [],

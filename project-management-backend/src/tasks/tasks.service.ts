@@ -1,9 +1,9 @@
-// src/tasks/tasks.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Task } from './entities/task.entity';
-// import { CreateTaskDto } from './dto/create-task.dto'; // পরে ব্যবহার হবে
+import { CreateTaskDto } from './dto/create-task.dto';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class TasksService {
@@ -12,12 +12,17 @@ export class TasksService {
     private tasksRepository: Repository<Task>,
   ) {}
 
-  // এই মেথডটি নিশ্চিত করুন যে এটি find() ব্যবহার করছে
-  async findAll(): Promise<Task[]> {
-    // this.tasksRepository.find() সবসময় একটি অ্যারে রিটার্ন করে
-    // যদি কোনো টাস্ক না থাকে, তবে এটি একটি খালি অ্যারে ([]) রিটার্ন করবে
-    return this.tasksRepository.find();
+  // টাস্ক তৈরির জন্য create মেথড
+  async create(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
+    const newTask = this.tasksRepository.create({
+      ...createTaskDto,
+      assignee: user, // লগইন করা ইউজারকে টাস্কের assignee হিসেবে সেট করা
+    });
+    return this.tasksRepository.save(newTask);
   }
 
-  // এখানে create, findOne, update, remove মেথডগুলো পরে যোগ হবে...
+  // সকল টাস্ক পাওয়ার জন্য findAll মেথড
+  async findAll(): Promise<Task[]> {
+    return this.tasksRepository.find({ relations: ['assignee'] });
+  }
 }
