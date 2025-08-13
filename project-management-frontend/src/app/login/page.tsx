@@ -13,35 +13,50 @@ const LoginPage = () => {
   const dispatch = useDispatch(); // এখন এটি সঠিকভাবে কাজ করবে
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  // src/app/login/page.tsx
 
-    try {
-      const response = await fetch('http://localhost:3001/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError(null);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Login failed');
-      }
+  try {
+    const response = await fetch('http://localhost:3001/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
 
-      const data = await response.json();
-      localStorage.setItem('token', data.access_token);
-      
-      // এখানে আপনাকে একটি প্রোফাইল এন্ডপয়েন্ট থেকে ইউজার তথ্য fetch করতে হবে
-      // এবং তারপর loginSuccess dispatch করতে হবে।
-      // আপাতত ডেমো ডেটা দিয়ে দেখাচ্ছি:
-      dispatch(loginSuccess({ token: data.access_token, user: { email } }));
-
-      router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Login failed');
     }
-  };
+
+    const data = await response.json();
+    const token = data.access_token;
+    localStorage.setItem('token', token);
+    
+    // --- সমাধানটি এখানে ---
+    // টোকেন ব্যবহার করে প্রোফাইল তথ্য আনুন
+    const profileResponse = await fetch('http://localhost:3001/auth/profile', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!profileResponse.ok) {
+      throw new Error('Could not fetch user profile after login');
+    }
+
+    const userProfile = await profileResponse.json();
+
+    // এখন সম্পূর্ণ ইউজার তথ্য দিয়ে Redux স্টোর আপডেট করুন
+    dispatch(loginSuccess({ token: token, user: userProfile }));
+
+    router.push('/dashboard');
+  } catch (err: any) {
+    setError(err.message);
+  }
+};
 
   return (
     <div>

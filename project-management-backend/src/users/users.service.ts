@@ -20,7 +20,6 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { email } });
   }
 
-  // এই মেথডটি JwtStrategy-র জন্য আবশ্যক
   async findOneById(id: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { id } });
   }

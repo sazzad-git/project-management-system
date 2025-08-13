@@ -1,5 +1,3 @@
-// src/users/entities/user.entity.ts
-
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 // এই enumটি অন্যান্য ফাইলে ব্যবহার করা হবে
@@ -20,15 +18,13 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-   @Column()
+  @Column()
   password: string;
-  
+
   @Column({
     type: 'enum',
     enum: UserRole,
     default: UserRole.DEVELOPER,
   })
   role: UserRole;
-
-   
 }

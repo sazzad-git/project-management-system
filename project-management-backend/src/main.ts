@@ -16,7 +16,7 @@ async function bootstrap() {
 
   // ২. গ্লোবাল ভ্যালিডেশন পাইপ যোগ করা হয়েছে
   // এটি নিশ্চিত করবে যে আপনার DTO-গুলো সঠিকভাবে ভ্যালিডেট হচ্ছে
-  app.useGlobalPipes(new ValidationPipe()); 
+  app.useGlobalPipes(new ValidationPipe());
 
   // listen() (আপনার আগের কোড থেকে)
   await app.listen(process.env.PORT ?? 3001);
