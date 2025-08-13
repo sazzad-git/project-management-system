@@ -23,4 +23,12 @@ export class UsersService {
   async findOneById(id: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { id } });
   }
+
+  async save(user: User): Promise<User> {
+    return this.usersRepository.save(user);
+  }
+
+  async findByResetToken(token: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { passwordResetToken: token } });
+  }
 }

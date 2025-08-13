@@ -24,7 +24,14 @@ export class User {
   @Column({
     type: 'enum',
     enum: UserRole,
-    default: UserRole.DEVELOPER,
   })
   role: UserRole;
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  jobTitle: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  passwordResetToken: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  passwordResetExpires: Date | null;
 }

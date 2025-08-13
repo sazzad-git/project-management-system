@@ -13,7 +13,6 @@ const CreateTaskForm = () => {
     setError(null);
     setSuccess(null);
 
-    // ১. লোকাল স্টোরেজ থেকে টোকেনটি নিন
     const token = localStorage.getItem('token');
 
     if (!token) {
@@ -24,12 +23,11 @@ const CreateTaskForm = () => {
     const newTaskData = { title, description };
 
     try {
-      // ২. এখানে আপনার API কল করার কোডটি থাকবে
       const response = await fetch('http://localhost:3001/tasks', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // টোকেনটি এখানে যোগ করা হচ্ছে
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(newTaskData),
       });
@@ -39,11 +37,9 @@ const CreateTaskForm = () => {
         throw new Error(errorData.message || 'Failed to create task');
       }
 
-      // সফলভাবে টাস্ক তৈরি হলে
       setSuccess('Task created successfully!');
       setTitle('');
       setDescription('');
-      // এখানে আপনি চাইলে ড্যাশবোর্ডের টাস্ক লিস্ট রিফ্রেশ করার জন্য Redux action dispatch করতে পারেন
 
     } catch (err: any) {
       setError(err.message);
@@ -51,32 +47,53 @@ const CreateTaskForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginTop: '20px', padding: '15px', border: '1px solid #ddd' }}>
-      <h3>Create a New Task</h3>
-      <div>
-        <label htmlFor="title">Title</label>
+    <form 
+      onSubmit={handleSubmit} 
+      className="bg-white shadow-lg rounded-2xl p-6 max-w-md mx-auto mt-6 border border-gray-200"
+    >
+      <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">
+        Create a New Task
+      </h3>
+
+      <div className="mb-4">
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+          Title
+        </label>
         <input
           id="title"
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
+          placeholder="Enter task title"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition"
         />
       </div>
-      <div>
-        <label htmlFor="description">Description</label>
+
+      <div className="mb-4">
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          Description
+        </label>
         <textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required
-          style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
+          placeholder="Enter task description"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition resize-none"
+          rows={4}
         />
       </div>
-      <button type="submit">Create Task</button>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>{success}</p>}
+
+      <button
+        type="submit"
+        className="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
+      >
+        Create Task
+      </button>
+
+      {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
+      {success && <p className="text-green-500 mt-4 text-center">{success}</p>}
     </form>
   );
 };

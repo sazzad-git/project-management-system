@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Request, Param, Patch } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -31,13 +31,13 @@ export class AuthController {
    * GET /auth/profile
    * লগইন করা ব্যবহারকারীর তথ্য পাওয়ার জন্য। JwtAuthGuard দিয়ে সুরক্ষিত।
    */
-    @UseGuards(JwtAuthGuard) // নিশ্চিত করে যে শুধুমাত্র লগইন করা ইউজাররাই এটি অ্যাক্সেস করতে পারবে
+  @UseGuards(JwtAuthGuard) // নিশ্চিত করে যে শুধুমাত্র লগইন করা ইউজাররাই এটি অ্যাক্সেস করতে পারবে
   @Get('profile')
   getProfile(@Request() req: { user: any }) {
     // JwtAuthGuard টোকেন ভ্যালিডেট করার পর req.user-এ ইউজার তথ্য যোগ করে দেয়
     return req.user;
   }
-  
+
   /**
    * POST /auth/logout
    * ব্যবহারকারীকে লগআউট করার জন্য। JwtAuthGuard দিয়ে সুরক্ষিত।
@@ -48,5 +48,22 @@ export class AuthController {
     // বর্তমানে এটি শুধু একটি সফলতার বার্তা পাঠায়।
     // ভবিষ্যতে এখানে টোকেন ব্ল্যাকলিস্ট করার লজিক যোগ করা যেতে পারে।
     return { message: 'User logged out successfully' };
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body('email') email: string) {
+    // সার্ভিসটি একটি অবজেক্ট রিটার্ন করবে যাতে resetToken আছে
+    const result = await this.authService.forgotPassword(email);
+    // ডেভেলপমেন্টের জন্য:
+    console.log('Password Reset Token:', result.resetToken);
+    return { message: 'If a user with that email exists, a password reset token has been generated.' };
+  }
+
+  @Patch('reset-password/:token')
+  async resetPassword(
+    @Param('token') token: string,
+    @Body('password') password: string,
+  ) {
+    return this.authService.resetPassword(token, password);
   }
 }
