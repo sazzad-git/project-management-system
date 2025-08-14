@@ -46,10 +46,14 @@ export class AuthService {
     return null;
   }
 
-  async login(user: any) {
+  async login(user: User) {
     const payload = { email: user.email, sub: user.id, role: user.role };
+
+    // পাসওয়ার্ড ফিল্ডটি রেসপন্স থেকে বাদ দিন
+    const { password, ...userProfile } = user;
     return {
       access_token: this.jwtService.sign(payload),
+      user: userProfile,
     };
   }
 

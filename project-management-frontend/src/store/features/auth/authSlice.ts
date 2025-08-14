@@ -1,26 +1,26 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // State-এর টাইপ
 interface AuthState {
   user: any | null;
   token: string | null;
   isAuthenticated: boolean;
-  status: 'idle' | 'loading' | 'succeeded' | 'failed'; // নতুন লোডিং স্টেট
+  status: "idle" | "loading" | "succeeded" | "failed"; // নতুন লোডিং স্টেট
 }
 
 const initialState: AuthState = {
   user: null,
   token: null,
   isAuthenticated: false,
-  status: 'idle', // প্রাথমিক স্ট্যাটাস 'idle'
+  status: "idle", // প্রাথমিক স্ট্যাটাস 'idle'
 };
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState, // initialState এখানে ব্যবহার করা হচ্ছে
   reducers: {
     authLoading(state) {
-      state.status = 'loading';
+      state.status = "loading";
     },
     loginSuccess(state, action: PayloadAction<{ user: any; token: string }>) {
       state.isAuthenticated = true;
@@ -31,17 +31,21 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.user = null;
       state.token = null;
-      localStorage.removeItem('token'); 
+      localStorage.removeItem("token");
+
+      // status-কে একটি চূড়ান্ত অবস্থায় পরিবর্তন করুন
+      state.status = "failed";
     },
     // স্টেট পুনরুদ্ধার করার জন্য একটি নতুন action
-     setAuthState(state, action: PayloadAction<{ user: any; token: string }>) {
+    setAuthState(state, action: PayloadAction<{ user: any; token: string }>) {
       state.isAuthenticated = true;
       state.user = action.payload.user;
       state.token = action.payload.token;
-      state.status = 'succeeded';
+      state.status = "succeeded";
     },
   },
 });
 
-export const { loginSuccess,authLoading, logout, setAuthState } = authSlice.actions;
+export const { loginSuccess, authLoading, logout, setAuthState } =
+  authSlice.actions;
 export default authSlice.reducer;

@@ -49,6 +49,15 @@ const EditProfilePage = () => {
     setMessage("");
     setError("");
     const token = localStorage.getItem("token");
+    const payload: { [key: string]: any } = {};
+
+  if (profileData.name) payload.name = profileData.name;
+  if (profileData.jobTitle) payload.jobTitle = profileData.jobTitle;
+  if (profileData.role) payload.role = profileData.role;
+  // শুধুমাত্র যদি profileImage খালি না থাকে, তাহলেই payload-এ যোগ করুন
+  if (profileData.profileImage) {
+    payload.profileImage = profileData.profileImage;
+  }
     try {
       const response = await fetch("http://localhost:3001/users/me/profile", {
         method: "PATCH",
@@ -56,7 +65,7 @@ const EditProfilePage = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(profileData),
+        body: JSON.stringify(payload),
       });
       const updatedUser = await response.json();
       if (!response.ok) throw new Error(updatedUser.message);

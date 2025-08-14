@@ -7,6 +7,7 @@ import { TasksModule } from './tasks/tasks.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './users/entities/user.entity';
 import { Task } from './tasks/entities/task.entity';
+import { TaskActivity } from './tasks/entities/task-activity.entity'; // ১. TaskActivity ইম্পোর্ট করুন
 
 @Module({
   imports: [
@@ -45,7 +46,7 @@ import { Task } from './tasks/entities/task.entity';
         username: configService.get<string>('DATABASE_USER'),
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
-        entities: [User, Task],
+        entities: [User, Task, TaskActivity],
         synchronize: true, // ডেভলপমেন্টের জন্য true, প্রোডাকশনে false রাখবেন
       }),
       inject: [ConfigService],

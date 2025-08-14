@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
-import { loginSuccess } from "../../store/features/auth/authSlice";
-import Link from "next/link"; // Link কম্পোনেন্ট ইম্পোর্ট করুন
+// loginSuccess-এর পরিবর্তে setAuthState ইম্পোর্ট করুন (অথবা loginSuccess-কেই আপডেট করুন)
+import { setAuthState } from "../../store/features/auth/authSlice";
+import Link from "next/link";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -12,53 +13,36 @@ const LoginPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   const dispatch = useDispatch();
-  const router = useRouter();
+  const router = useRouter(); // যদিও আমরা push ব্যবহার করব না, রাউটার অবজেক্টটি রাখা যেতে পারে
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+ const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError(null);
 
-    try {
-      const response = await fetch("http://localhost:3001/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+  try {
+    const response = await fetch("http://localhost:3001/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Login failed");
-      }
+    // ১. রেসপন্স বডি একবার পড়ুন এবং একটি ভেরিয়েবলে সেভ করুন
+    const data = await response.json();
 
-      const data = await response.json();
-      const token = data.access_token;
-      localStorage.setItem("token", token);
-
-      const profileResponse = await fetch(
-        "http://localhost:3001/auth/profile",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!profileResponse.ok) {
-        throw new Error("Could not fetch user profile after login");
-      }
-
-      const userProfile = await profileResponse.json();
-      // loginSuccess এখন আর এখানে ব্যবহৃত হচ্ছে না, setAuthState ব্যবহার করুন
-      // dispatch(loginSuccess({ token: token, user: userProfile }));
-      // যদি আপনার authSlice-এ loginSuccess থাকে, সেটিও ব্যবহার করতে পারেন।
-      // তবে setAuthState ব্যবহার করা সঙ্গতিপূর্ণ।
-
-      router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message);
+    if (!response.ok) {
+      throw new Error(data.message || 'Login failed');
     }
-  };
+    // ২. টোকেন এবং ইউজার প্রোফাইল তথ্য নিন
+    const token = data.access_token;
+    const userProfile = data.user; // আপনার ব্যাকএন্ড থেকে ইউজার তথ্য আসার কথা
 
+    localStorage.setItem("token", token);
+    dispatch(setAuthState({ token: token, user: userProfile }));
+
+  } catch (err: any) {
+    setError(err.message);
+  }
+};
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 p-4">
       <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-8">
@@ -66,6 +50,7 @@ const LoginPage = () => {
           Login to ProjectFlow
         </h1>
         <form onSubmit={handleLogin} className="space-y-5">
+          {/* আপনার ফর্মের বাকি অংশ অপরিবর্তিত থাকবে */}
           <div>
             <label
               htmlFor="email"
@@ -100,8 +85,6 @@ const LoginPage = () => {
               placeholder="••••••••"
             />
           </div>
-
-          {/* --- নতুন: Forgot Password লিংক --- */}
           <div className="flex justify-end">
             <Link
               href="/forgot-password"
@@ -110,11 +93,9 @@ const LoginPage = () => {
               Forgot Password?
             </Link>
           </div>
-
           {error && (
             <p className="text-red-500 text-sm text-center">{error}</p>
           )}
-
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg shadow-md transition duration-200"
@@ -124,7 +105,6 @@ const LoginPage = () => {
         </form>
         <p className="mt-6 text-center text-sm text-gray-500">
           Don’t have an account?{" "}
-          {/* <a> ট্যাগকে <Link> দিয়ে প্রতিস্থাপন করা হয়েছে */}
           <Link
             href="/register"
             className="text-blue-600 hover:underline font-medium"
