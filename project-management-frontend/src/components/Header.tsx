@@ -5,49 +5,27 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../store/store";
-import { setAuthState, logout } from "../store/features/auth/authSlice";
+import { logout } from "../store/features/auth/authSlice";
+import Image from "next/image";
 import {
   FaUserCircle,
   FaBell,
   FaSearch,
   FaProjectDiagram,
 } from "react-icons/fa";
-import Image from "next/image";
 
 const Header = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+  // Header এখন শুধুমাত্র Redux স্টোর থেকে ডেটা পড়বে
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      const fetchProfile = async () => {
-        try {
-          const profileResponse = await fetch(
-            "http://localhost:3001/auth/profile",
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-          if (profileResponse.ok) {
-            const userProfile = await profileResponse.json();
-            dispatch(setAuthState({ user: userProfile, token }));
-          } else {
-            dispatch(logout());
-          }
-        } catch (error) {
-          console.error("Failed to fetch profile on load:", error);
-          dispatch(logout());
-        }
-      };
-      fetchProfile();
-    }
-  }, [dispatch]);
+  // --- পেজ লোডে প্রোফাইল fetch করার useEffect হুকটি এখান থেকে মুছে ফেলা হয়েছে ---
+  // এই দায়িত্বটি এখন AuthWrapper পালন করবে, যা Race Condition প্রতিরোধ করবে।
 
   const handleLogout = () => {
     dispatch(logout());
@@ -55,6 +33,7 @@ const Header = () => {
     router.push("/login");
   };
 
+  // ড্রপডাউন মেনুর বাইরে ক্লিক করলে বন্ধ করার জন্য useEffect (এটি থাকবে)
   useEffect(() => {
     const closeDropdown = () => setIsDropdownOpen(false);
     if (isDropdownOpen) {
@@ -63,9 +42,10 @@ const Header = () => {
     return () => window.removeEventListener("click", closeDropdown);
   }, [isDropdownOpen]);
 
+  // আপনার সুন্দর ডিজাইন এবং UI লজিক সম্পূর্ণ অপরিবর্তিত
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg">
-      {/* Left Logo */}
+      {/* বাম অংশ */}
       <div className="flex items-center gap-2">
         <FaProjectDiagram className="text-white drop-shadow-md" size={28} />
         <Link
@@ -76,7 +56,7 @@ const Header = () => {
         </Link>
       </div>
 
-      {/* Center Search */}
+      {/* মধ্যম অংশ */}
       <div className="flex flex-1 justify-center px-4">
         <div className="flex items-center w-full max-w-md px-4 py-2 bg-white/20 backdrop-blur-md rounded-full hover:bg-white/30 transition cursor-pointer">
           <FaSearch className="text-white opacity-80" />
@@ -84,8 +64,8 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Right Side */}
-       <div className="flex items-center gap-5">
+      {/* ডান অংশ */}
+      <div className="flex items-center gap-5">
         {isAuthenticated ? (
           <>
             <FaBell
@@ -100,8 +80,6 @@ const Header = () => {
                   setIsDropdownOpen(!isDropdownOpen);
                 }}
               >
-                {/* --- পরিবর্তনটি এখানে --- */}
-                {/* শর্তসাপেক্ষে প্রোফাইল ইমেজ বা ডিফল্ট আইকন দেখান */}
                 {user?.profileImage ? (
                   <div className="relative w-8 h-8">
                     <Image
@@ -118,7 +96,6 @@ const Header = () => {
                 <span className="font-medium">{user?.name || "Guest"}</span>
               </div>
               
-              {/* ড্রপডাউন মেনু (অপরিবর্তিত) */}
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-3 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                   <Link

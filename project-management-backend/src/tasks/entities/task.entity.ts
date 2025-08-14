@@ -1,5 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { TaskActivity } from './task-activity.entity';
+
 export enum TaskStatus {
   TODO = 'todo',
   IN_PROGRESS = 'in_progress',
@@ -29,6 +39,17 @@ export class Task {
     enum: TaskPriority,
     default: TaskPriority.MEDIUM,
   })
+  @CreateDateColumn() // টাস্কটি কখন তৈরি হয়েছে
+  createdAt: Date;
+
+  @UpdateDateColumn() // টাস্কটি শেষ কখন আপডেট হয়েছে
+  updatedAt: Date;
+  @OneToMany(() => TaskActivity, (activity) => activity.task, {
+    eager: true,
+    cascade: true,
+  })
+  activities: TaskActivity[];
+
   priority: TaskPriority;
   @Column({ type: 'timestamp', nullable: true })
   dueDate: Date;

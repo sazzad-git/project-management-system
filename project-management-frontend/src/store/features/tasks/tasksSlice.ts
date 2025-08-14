@@ -7,9 +7,19 @@ export interface Task {
   title: string;
   description: string;
   status: "todo" | "in_progress" | "done";
+  createdAt: string; // createdAt যোগ করুন
   assignee?: {
-    // assignee ঐচ্ছিক হতে পারে
     id: string;
+    name: string;
+  };
+  activities?: TaskActivity[]; // activities অ্যারে যোগ করুন
+}
+
+export interface TaskActivity {
+  id: string;
+  description: string;
+  createdAt: string; // API থেকে ডেট স্ট্রিং হিসেবে আসে
+  user: {
     name: string;
   };
 }
