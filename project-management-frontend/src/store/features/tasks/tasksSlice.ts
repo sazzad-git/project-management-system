@@ -1,55 +1,96 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
 // Task-এর জন্য একটি টাইপ ডিফাইন করুন
+// আমরা এখানে assignee যোগ করব, কারণ API থেকে এই তথ্যটি আসে
 export interface Task {
   id: string;
   title: string;
   description: string;
-  status: 'todo' | 'in_progress' | 'done';
+  status: "todo" | "in_progress" | "done";
+  assignee?: {
+    // assignee ঐচ্ছিক হতে পারে
+    id: string;
+    name: string;
+  };
 }
 
 // State-এর টাইপ ডিফাইন করুন
 interface TasksState {
   tasks: Task[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 }
 
 // প্রাথমিক স্টেট
 const initialState: TasksState = {
   tasks: [],
-  status: 'idle',
+  status: "idle",
   error: null,
 };
 
 // API থেকে ডেটা আনার জন্য একটি async thunk
-export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
-  const response = await fetch('http://localhost:3001/tasks'); // আপনার ব্যাকএন্ড API এন্ডপয়েন্ট
-  const data = await response.json();
-  return data as Task[];
-});
+// এখন এটি টোকেন ব্যবহার করে রিকোয়েস্ট পাঠাবে
+export const fetchTasks = createAsyncThunk(
+  "tasks/fetchTasks",
+  async (_, { rejectWithValue }) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return rejectWithValue("No token found");
+    }
+    try {
+      const response = await fetch("http://localhost:3001/tasks", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch tasks");
+      }
+      const data = await response.json();
+      return data as Task[];
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 // Slice তৈরি করুন
 const tasksSlice = createSlice({
-  name: 'tasks',
+  name: "tasks",
   initialState,
   reducers: {
-    // এখানে সিঙ্ক্রোনাস অ্যাকশন যোগ করতে পারেন, যেমন addTask, updateTask ইত্যাদি
+    // --- নতুন updateTaskStatus রিডিউসারটি এখানে যোগ করা হয়েছে ---
+    updateTaskStatus: (state, action: PayloadAction<Task>) => {
+      // state.tasks অ্যারের ভেতরে নির্দিষ্ট টাস্কটি খুঁজে বের করুন
+      const index = state.tasks.findIndex(
+        (task) => task.id === action.payload.id
+      );
+
+      // যদি টাস্কটি পাওয়া যায়, তাহলে সেটিকে নতুন তথ্য দিয়ে প্রতিস্থাপন করুন
+      if (index !== -1) {
+        state.tasks[index] = action.payload;
+      }
+    },
+    // আপনি ভবিষ্যতে এখানে আরও রিডিউসার যোগ করতে পারেন
+    // যেমন: addTask, removeTask ইত্যাদি
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchTasks.pending, (state) => {
-        state.status = 'loading';
+        state.status = "loading";
       })
       .addCase(fetchTasks.fulfilled, (state, action: PayloadAction<Task[]>) => {
-        state.status = 'succeeded';
+        state.status = "succeeded";
         state.tasks = action.payload;
       })
       .addCase(fetchTasks.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message || 'Something went wrong';
+        state.status = "failed";
+        state.error = (action.payload as string) || "Something went wrong";
       });
   },
 });
+
+// --- updateTaskStatus অ্যাকশনটি এক্সপোর্ট করা হয়েছে ---
+export const { updateTaskStatus } = tasksSlice.actions;
 
 export default tasksSlice.reducer;
