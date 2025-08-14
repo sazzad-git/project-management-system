@@ -1,8 +1,18 @@
-import { Controller, Post, Get, Body, UseGuards, Request, Param, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  UseGuards,
+  Request,
+  Param,
+  Patch,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard'; // JwtAuthGuard ইম্পোর্ট করুন
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -52,11 +62,18 @@ export class AuthController {
 
   @Post('forgot-password')
   async forgotPassword(@Body('email') email: string) {
-    // সার্ভিসটি একটি অবজেক্ট রিটার্ন করবে যাতে resetToken আছে
-    const result = await this.authService.forgotPassword(email);
-    // ডেভেলপমেন্টের জন্য:
-    console.log('Password Reset Token:', result.resetToken);
-    return { message: 'If a user with that email exists, a password reset token has been generated.' };
+    // সার্ভিসটি এখন আর কিছু রিটার্ন করে না, তাই কোনো result ভেরিয়েবল নেই
+    await this.authService.forgotPassword(email);
+
+    // console.log লাইনটি মুছে ফেলুন
+    // console.log('Password Reset Token:', result.resetToken); // <-- এই লাইনটি মুছে ফেলুন
+
+    // একটি জেনেরিক সফলতার বার্তা রিটার্ন করুন
+    return {
+      statusCode: 200,
+      message:
+        'If an account with that email exists, a password reset link has been sent.',
+    };
   }
 
   @Patch('reset-password/:token')
@@ -65,5 +82,12 @@ export class AuthController {
     @Body('password') password: string,
   ) {
     return this.authService.resetPassword(token, password);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('change-password')
+  changePassword(@Request() req, @Body() changePasswordDto: ChangePasswordDto) {
+    const userId = req.user.id;
+    return this.authService.changePassword(userId, changePasswordDto);
   }
 }

@@ -12,6 +12,7 @@ import {
   FaSearch,
   FaProjectDiagram,
 } from "react-icons/fa";
+import Image from "next/image";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -84,7 +85,7 @@ const Header = () => {
       </div>
 
       {/* Right Side */}
-      <div className="flex items-center gap-5">
+       <div className="flex items-center gap-5">
         {isAuthenticated ? (
           <>
             <FaBell
@@ -99,9 +100,25 @@ const Header = () => {
                   setIsDropdownOpen(!isDropdownOpen);
                 }}
               >
-                <FaUserCircle size={28} className="text-yellow-300" />
+                {/* --- পরিবর্তনটি এখানে --- */}
+                {/* শর্তসাপেক্ষে প্রোফাইল ইমেজ বা ডিফল্ট আইকন দেখান */}
+                {user?.profileImage ? (
+                  <div className="relative w-8 h-8">
+                    <Image
+                      src={user.profileImage}
+                      alt="User Avatar"
+                      layout="fill"
+                      className="rounded-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <FaUserCircle size={28} className="text-yellow-300" />
+                )}
+                
                 <span className="font-medium">{user?.name || "Guest"}</span>
               </div>
+              
+              {/* ড্রপডাউন মেনু (অপরিবর্তিত) */}
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-3 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                   <Link

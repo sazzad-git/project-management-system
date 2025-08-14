@@ -6,10 +6,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { RootState } from '../store/store';
 import { setAuthState, logout } from '../store/features/auth/authSlice';
 
-// --- পরিবর্তনটি এখানে ---
 // এই রাউটগুলো পাবলিক (লগইন ছাড়া অ্যাক্সেস করা যায়)
-// হোমপেজ ('/')-কে এই তালিকায় যোগ করুন
-const publicRoutes = ['/', '/login', '/register', '/forgot-password'];
+const publicRoutes = ['/', '/login', '/signup', '/forgot-password'];
 
 const AuthWrapper = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
@@ -19,15 +17,15 @@ const AuthWrapper = ({ children }: { children: React.ReactNode }) => {
 
   const [isInitialCheckDone, setIsInitialCheckDone] = useState(false);
 
+  // পেজ লোড হওয়ার সময় অথেনটিকেশন স্টেট চেক করার জন্য useEffect
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuthStatus = async () => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
           const profileResponse = await fetch('http://localhost:3001/auth/profile', {
             headers: { 'Authorization': `Bearer ${token}` },
           });
-
           if (profileResponse.ok) {
             const userProfile = await profileResponse.json();
             dispatch(setAuthState({ user: userProfile, token }));
@@ -35,53 +33,57 @@ const AuthWrapper = ({ children }: { children: React.ReactNode }) => {
             dispatch(logout());
           }
         } catch (error) {
-          console.error('Failed to validate token:', error);
+          console.error('Failed to validate token on load:', error);
           dispatch(logout());
         }
       }
+      // টোকেন থাকুক বা না থাকুক, প্রাথমিক চেক সম্পন্ন হয়েছে
       setIsInitialCheckDone(true);
     };
 
-    // যদি স্টোরে তথ্য না থাকে, তাহলেই শুধু চেক করুন
-    if (!isAuthenticated) {
-      checkAuth();
-    } else {
-      setIsInitialCheckDone(true);
-    }
-  }, [dispatch, isAuthenticated]);
+    checkAuthStatus();
+  }, [dispatch]); // এই useEffect শুধুমাত্র একবারই চলবে
 
+  // রিডাইরেকশনের জন্য দ্বিতীয় useEffect
   useEffect(() => {
+    // শুধুমাত্র যদি প্রাথমিক চেক সম্পন্ন হয়, তাহলেই রিডাইরেকশনের লজিক চালাও
     if (isInitialCheckDone) {
-const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith('/reset-password/');
+      const isPublic = publicRoutes.includes(pathname) || pathname.startsWith('/reset-password/');
 
-      if (!isAuthenticated && !isPublicRoute) {
+      // যদি লগইন করা না থাকে এবং সুরক্ষিত পেজে যাওয়ার চেষ্টা করে
+      if (!isAuthenticated && !isPublic) {
         router.push('/login');
       }
 
-      if (isAuthenticated && isPublicRoute && pathname !== '/') {
+      // যদি লগইন করা থাকে এবং কোনো পাবলিক পেজে যাওয়ার চেষ্টা করে (হোমপেজ ছাড়া)
+      if (isAuthenticated && isPublic && pathname !== '/') {
         router.push('/dashboard');
       }
     }
   }, [isAuthenticated, isInitialCheckDone, pathname, router]);
 
-  // --- নতুন, সহজ রেন্ডারিং লজিক ---
-  
-  // যদি প্রাথমিক চেক সম্পন্ন না হয়, তাহলে একটি লোডিং UI দেখান
+
+  // --- চূড়ান্ত এবং সহজ রেন্ডারিং লজিক ---
+
+  const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith('/reset-password/');
+
+  // যদি প্রাথমিক চেক শেষ না হয়, তাহলে একটি লোডিং UI দেখান
   if (!isInitialCheckDone) {
     return <div>Loading...</div>;
   }
 
-  // যদি রাউটটি পাবলিক হয়, তাহলে children রেন্ডার করার অনুমতি দিন
-  if (publicRoutes.includes(pathname)) {
+  // যদি পেজটি একটি পাবলিক পেজ হয়, তাহলে দেখান
+  if (isPublicRoute) {
     return <>{children}</>;
   }
 
-  // যদি রাউটটি সুরক্ষিত হয় এবং ব্যবহারকারী লগইন করা থাকে, তাহলেও children রেন্ডার করার অনুমতি দিন
-  if (!publicRoutes.includes(pathname) && isAuthenticated) {
+  // যদি পেজটি সুরক্ষিত হয় এবং ব্যবহারকারী লগইন করা থাকে, তাহলে দেখান
+  if (!isPublicRoute && isAuthenticated) {
     return <>{children}</>;
   }
 
-  // অন্যথায়, ব্যবহারকারীকে রিডাইরেক্ট করা হচ্ছে, তাই লোডিং দেখানোই ভালো
+  // অন্য সব ক্ষেত্রে (যেমন, সুরক্ষিত পেজে যাওয়ার চেষ্টা করছে কিন্তু এখনো লগইন পেজে রিডাইরেক্ট হয়নি)
+  // লোডিং দেখানোই শ্রেয়
   return <div>Loading...</div>;
 };
 

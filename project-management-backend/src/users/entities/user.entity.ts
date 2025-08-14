@@ -34,4 +34,7 @@ export class User {
 
   @Column({ type: 'timestamp', nullable: true })
   passwordResetExpires: Date | null;
+
+  @Column({ type: 'text', nullable: true }) // 'text' ব্যবহার করা ভালো কারণ URL লম্বা হতে পারে
+  profileImage: string;
 }

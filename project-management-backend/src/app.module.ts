@@ -15,7 +15,7 @@ import { Task } from './tasks/entities/task.entity';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    
+
     // ইমেইল পাঠানোর জন্য MailerModule কনফিগারেশন
     MailerModule.forRootAsync({
       imports: [ConfigModule], // MailerModule-এর ভেতরে ConfigService ব্যবহারের জন্য
