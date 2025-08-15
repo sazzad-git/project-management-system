@@ -4,11 +4,13 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, DataSource } from 'typeorm';
 import { Project } from './entities/project.entity';
 import { User, UserRole } from '../users/entities/user.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
+import { Task } from '../tasks/entities/task.entity';
+import { TaskActivity } from '../tasks/entities/task-activity.entity';
 
 @Injectable()
 export class ProjectsService {
@@ -17,6 +19,7 @@ export class ProjectsService {
     private projectsRepository: Repository<Project>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private dataSource: DataSource, // DataSource ইনজেক্ট করুন
   ) {}
 
   async create(
@@ -116,28 +119,62 @@ export class ProjectsService {
     return this.projectsRepository.save(project);
   }
 
-  // --- নতুন: remove মেথড ---
+  // remove মেথড (চূড়ান্ত সমাধান - Transaction সহ)
   async remove(id: string, user: User): Promise<{ message: string }> {
-    const project = await this.projectsRepository.findOne({
-      where: { id },
-      relations: ['creator'],
-    });
-    if (!project) {
-      throw new NotFoundException(`Project with ID "${id}" not found.`);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // ট্রানজ্যাকশনের মধ্যে Repository ব্যবহার করুন
+      const projectRepo = queryRunner.manager.getRepository(Project);
+      const taskRepo = queryRunner.manager.getRepository(Task);
+      const activityRepo = queryRunner.manager.getRepository(TaskActivity);
+
+      const project = await projectRepo.findOne({
+        where: { id },
+        relations: ['creator', 'tasks', 'tasks.activities'],
+      });
+      if (!project) {
+        throw new NotFoundException(`Project with ID "${id}" not found.`);
+      }
+
+      // পারমিশন চেক
+      if (user.role !== UserRole.ADMIN && project.creator.id !== user.id) {
+        throw new UnauthorizedException(
+          'You do not have permission to delete this project.',
+        );
+      }
+
+      // ১. প্রথমে প্রতিটি টাস্কের সাথে সম্পর্কিত সব অ্যাক্টিভিটি ডিলিট করুন
+      for (const task of project.tasks) {
+        if (task.activities && task.activities.length > 0) {
+          await activityRepo.remove(task.activities);
+        }
+      }
+
+      // ২. এরপর প্রজেক্টের সাথে সম্পর্কিত সব টাস্ক ডিলিট করুন
+      if (project.tasks && project.tasks.length > 0) {
+        await taskRepo.remove(project.tasks);
+      }
+
+      // ৩. সবশেষে, মূল প্রজেক্টটিকে ডিলিট করুন
+      await projectRepo.remove(project);
+
+      await queryRunner.commitTransaction();
+
+      return { message: 'Project and all related data deleted successfully.' };
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      if (
+        err instanceof NotFoundException ||
+        err instanceof UnauthorizedException
+      ) {
+        throw err;
+      }
+      throw new Error(`Failed to delete project: ${err.message}`);
+    } finally {
+      await queryRunner.release();
     }
-
-    // পারমিশন চেক: শুধুমাত্র Admin অথবা প্রজেক্টের স্রষ্টা প্রজেক্ট ডিলিট করতে পারবে
-    if (user.role !== UserRole.ADMIN && project.creator.id !== user.id) {
-      throw new UnauthorizedException(
-        'You do not have permission to delete this project.',
-      );
-    }
-
-    // onDelete: 'CASCADE' (Task এনটিটিতে) থাকার কারণে, এই প্রজেক্টের সাথে সম্পর্কিত সব টাস্ক স্বয়ংক্রিয়ভাবে ডিলিট হয়ে যাবে
-    await this.projectsRepository.delete(id);
-
-    return {
-      message: 'Project and all related tasks have been deleted successfully.',
-    };
   }
 }
