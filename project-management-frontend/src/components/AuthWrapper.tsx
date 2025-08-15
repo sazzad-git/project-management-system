@@ -54,7 +54,7 @@ const AuthWrapper = ({ children }: { children: React.ReactNode }) => {
       }
       // যদি লগইন করা থাকে এবং পাবলিক পেজে যাওয়ার চেষ্টা করে (হোমপেজ ছাড়া)
       if (isAuthenticated && isPublic && pathname !== '/') {
-        router.push('/dashboard');
+        router.push('/projects');
       }
     }
   }, [isAuthenticated, isCheckDone, isPublic, pathname, router]);

@@ -12,6 +12,12 @@ export interface Task {
     id: string;
     name: string;
   };
+  creator?: {
+    // creator ঐচ্ছিক হতে পারে
+    id: string;
+    name: string;
+  };
+  assignees?: { id: string; name: string }[];
   activities?: TaskActivity[]; // activities অ্যারে যোগ করুন
 }
 
@@ -39,22 +45,24 @@ const initialState: TasksState = {
 };
 
 // API থেকে ডেটা আনার জন্য একটি async thunk
-// এখন এটি টোকেন ব্যবহার করে রিকোয়েস্ট পাঠাবে
-export const fetchTasks = createAsyncThunk(
-  "tasks/fetchTasks",
-  async (_, { rejectWithValue }) => {
+export const fetchTasksByProjectId = createAsyncThunk(
+  "tasks/fetchByProject",
+  async (projectId: string, { rejectWithValue }) => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      return rejectWithValue("No token found");
-    }
+    if (!token) return rejectWithValue("No token found");
     try {
-      const response = await fetch("http://localhost:3001/tasks", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // এই নতুন এন্ডপয়েন্টটি আমাদের ব্যাকএন্ডে তৈরি করতে হবে
+      const response = await fetch(
+        `http://localhost:3001/projects/${projectId}/tasks`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       if (!response.ok) {
-        throw new Error("Failed to fetch tasks");
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || "Failed to fetch tasks for this project"
+        );
       }
       const data = await response.json();
       return data as Task[];
@@ -69,31 +77,37 @@ const tasksSlice = createSlice({
   name: "tasks",
   initialState,
   reducers: {
-    // --- নতুন updateTaskStatus রিডিউসারটি এখানে যোগ করা হয়েছে ---
+    // আপনার পুরনো রিডিউসারগুলো এখানে থাকবে
     updateTaskStatus: (state, action: PayloadAction<Task>) => {
-      // state.tasks অ্যারের ভেতরে নির্দিষ্ট টাস্কটি খুঁজে বের করুন
       const index = state.tasks.findIndex(
         (task) => task.id === action.payload.id
       );
-
-      // যদি টাস্কটি পাওয়া যায়, তাহলে সেটিকে নতুন তথ্য দিয়ে প্রতিস্থাপন করুন
       if (index !== -1) {
         state.tasks[index] = action.payload;
       }
     },
-    // আপনি ভবিষ্যতে এখানে আরও রিডিউসার যোগ করতে পারেন
-    // যেমন: addTask, removeTask ইত্যাদি
+    deleteTaskSuccess: (state, action: PayloadAction<string>) => {
+      state.tasks = state.tasks.filter((task) => task.id !== action.payload);
+    },
+    // আপনি চাইলে টাস্ক তৈরি করার পর fetch না করে, ম্যানুয়ালি যোগ করতে পারেন
+    addTaskSuccess: (state, action: PayloadAction<Task>) => {
+      state.tasks.push(action.payload);
+    },
   },
   extraReducers: (builder) => {
+    // builder এখন fetchTasksByProjectId হ্যান্ডেল করবে
     builder
-      .addCase(fetchTasks.pending, (state) => {
+      .addCase(fetchTasksByProjectId.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(fetchTasks.fulfilled, (state, action: PayloadAction<Task[]>) => {
-        state.status = "succeeded";
-        state.tasks = action.payload;
-      })
-      .addCase(fetchTasks.rejected, (state, action) => {
+      .addCase(
+        fetchTasksByProjectId.fulfilled,
+        (state, action: PayloadAction<Task[]>) => {
+          state.status = "succeeded";
+          state.tasks = action.payload;
+        }
+      )
+      .addCase(fetchTasksByProjectId.rejected, (state, action) => {
         state.status = "failed";
         state.error = (action.payload as string) || "Something went wrong";
       });
@@ -101,6 +115,7 @@ const tasksSlice = createSlice({
 });
 
 // --- updateTaskStatus অ্যাকশনটি এক্সপোর্ট করা হয়েছে ---
-export const { updateTaskStatus } = tasksSlice.actions;
+export const { updateTaskStatus, deleteTaskSuccess, addTaskSuccess } =
+  tasksSlice.actions;
 
 export default tasksSlice.reducer;

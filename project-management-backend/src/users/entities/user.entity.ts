@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
+import { Task } from '../../tasks/entities/task.entity';
 
 // এই enumটি অন্যান্য ফাইলে ব্যবহার করা হবে
 export enum UserRole {
@@ -37,4 +38,7 @@ export class User {
 
   @Column({ type: 'text', nullable: true }) // 'text' ব্যবহার করা ভালো কারণ URL লম্বা হতে পারে
   profileImage: string;
+
+  @ManyToMany(() => Task, (task) => task.assignees)
+  tasks: Task[];
 }

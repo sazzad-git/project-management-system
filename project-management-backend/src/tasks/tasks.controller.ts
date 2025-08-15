@@ -5,30 +5,31 @@ import {
   Body,
   UseGuards,
   Request,
-  Patch, // ১. Patch ইম্পোর্ট করুন
-  Param, // ২. Param ইম্পোর্ট করুন
+  Patch,
+  Param,
+  Delete,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard'; // ৩. RolesGuard ইম্পোর্ট করুন
-import { Roles } from '../auth/roles.decorator';
-import { UserRole } from '../users/entities/user.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
+
 @Controller('tasks')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard) // সকল রাউট এখন শুধুমাত্র লগইন করা ইউজারদের জন্য
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
+
   @Get()
   findMyTasks(@Request() req) {
     return this.tasksService.findTasksForUser(req.user);
   }
+
   @Post()
-  @Roles(UserRole.ADMIN, UserRole.PROJECT_MANAGER)
   create(@Body() createTaskDto: CreateTaskDto, @Request() req) {
     return this.tasksService.create(createTaskDto, req.user);
   }
-  // এখন আর এরর দেখাবে না
+
   @Patch(':id/status')
   updateStatus(
     @Param('id') id: string,
@@ -40,5 +41,19 @@ export class TasksController {
       updateTaskStatusDto.status,
       req.user,
     );
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string, @Request() req) {
+    return this.tasksService.remove(id, req.user);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateTaskDto: UpdateTaskDto,
+    @Request() req,
+  ) {
+    return this.tasksService.update(id, updateTaskDto, req.user);
   }
 }

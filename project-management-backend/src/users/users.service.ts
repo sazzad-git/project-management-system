@@ -52,4 +52,11 @@ export class UsersService {
     const { password, ...result } = updatedUser;
     return result as User;
   }
+
+  // --- এই নতুন মেথডটি যোগ করুন ---
+  async findAll(): Promise<Omit<User, 'password'>[]> {
+    return this.usersRepository.find({
+      select: ['id', 'name', 'email', 'role', 'jobTitle', 'profileImage'], // পাসওয়ার্ড ফিল্ডটি বাদ দিন
+    });
+  }
 }

@@ -6,9 +6,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { TaskActivity } from './task-activity.entity';
+import { Project } from '../../projects/entities/project.entity';
 
 export enum TaskStatus {
   TODO = 'todo',
@@ -47,14 +50,25 @@ export class Task {
   @OneToMany(() => TaskActivity, (activity) => activity.task, {
     eager: true,
     cascade: true,
+    onDelete: 'CASCADE', // এই অপশনটি যোগ করুন
   })
   activities: TaskActivity[];
-
+  @Column({ type: 'enum', enum: TaskPriority, default: TaskPriority.MEDIUM })
   priority: TaskPriority;
+  // --- নতুন: creator সম্পর্কটি এখানে যোগ করুন ---
+  @ManyToOne(() => User, { eager: true }) // eager: true দিলে টাস্ক লোড করার সময় creator-ও চলে আসবে
+  creator: User;
   @Column({ type: 'timestamp', nullable: true })
   dueDate: Date;
   @ManyToOne(() => User, { eager: true })
   assignee: User;
   @Column('uuid', { array: true, nullable: true })
   dependencies: string[];
+
+  @ManyToOne(() => Project, (project) => project.tasks, { onDelete: 'CASCADE' })
+  project: Project;
+
+  @ManyToMany(() => User, { eager: true }) // eager: true দিলে টাস্ক লোড করার সময় assignees-ও চলে আসবে
+  @JoinTable() // TypeORM-কে একটি জয়েন টেবিল (task_assignees_user) তৈরি করতে বলে
+  assignees: User[]; // এখন এটি একটি User অ্যারে
 }
