@@ -49,7 +49,7 @@ const Header = () => {
       <div className="flex items-center gap-2">
         <FaProjectDiagram className="text-white drop-shadow-md" size={28} />
         <Link
-          href="/dashboard"
+          href="/projects"
           className="text-2xl font-bold text-white hover:text-yellow-300 transition"
         >
           ProjectFlow

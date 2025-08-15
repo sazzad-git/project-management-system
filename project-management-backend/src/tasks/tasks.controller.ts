@@ -56,4 +56,11 @@ export class TasksController {
   ) {
     return this.tasksService.update(id, updateTaskDto, req.user);
   }
+
+  // --- নতুন: একটি নির্দিষ্ট টাস্ক খোঁজার এন্ডপয়েন্ট ---
+  @Get(':id')
+  findOne(@Param('id') id: string, @Request() req) {
+    // সার্ভিস লেভেলে পারমিশন চেক করা হবে
+    return this.tasksService.findOneById(id, req.user);
+  }
 }

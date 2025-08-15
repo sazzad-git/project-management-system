@@ -1,5 +1,16 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
+// নতুন: Comment টাইপ
+export interface Comment {
+  id: string;
+  text: string;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string;
+  };
+}
+
 // Task-এর জন্য একটি টাইপ ডিফাইন করুন
 // আমরা এখানে assignee যোগ করব, কারণ API থেকে এই তথ্যটি আসে
 export interface Task {
@@ -19,6 +30,7 @@ export interface Task {
   };
   assignees?: { id: string; name: string }[];
   activities?: TaskActivity[]; // activities অ্যারে যোগ করুন
+  comments?: Comment[];
 }
 
 export interface TaskActivity {
@@ -93,6 +105,17 @@ const tasksSlice = createSlice({
     addTaskSuccess: (state, action: PayloadAction<Task>) => {
       state.tasks.push(action.payload);
     },
+
+    addCommentToTask: (
+      state,
+      action: PayloadAction<{ taskId: string; newComment: Comment }>
+    ) => {
+      const task = state.tasks.find((t) => t.id === action.payload.taskId);
+      if (task) {
+        if (!task.comments) task.comments = [];
+        task.comments.push(action.payload.newComment);
+      }
+    },
   },
   extraReducers: (builder) => {
     // builder এখন fetchTasksByProjectId হ্যান্ডেল করবে
@@ -115,7 +138,11 @@ const tasksSlice = createSlice({
 });
 
 // --- updateTaskStatus অ্যাকশনটি এক্সপোর্ট করা হয়েছে ---
-export const { updateTaskStatus, deleteTaskSuccess, addTaskSuccess } =
-  tasksSlice.actions;
+export const {
+  updateTaskStatus,
+  deleteTaskSuccess,
+  addTaskSuccess,
+  addCommentToTask,
+} = tasksSlice.actions;
 
 export default tasksSlice.reducer;

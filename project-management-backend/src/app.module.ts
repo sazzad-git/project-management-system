@@ -10,6 +10,8 @@ import { Task } from './tasks/entities/task.entity';
 import { TaskActivity } from './tasks/entities/task-activity.entity'; // ১. TaskActivity ইম্পোর্ট করুন
 import { ProjectsModule } from './projects/projects.module';
 import { Project } from './projects/entities/project.entity';
+import { CommentsModule } from './comments/comments.module'; // ১. CommentsModule ইম্পোর্ট করুন
+import { Comment } from './comments/entities/comment.entity'; // ২. Comment এনটিটি ইম্পোর্ট করুন
 
 @Module({
   imports: [
@@ -48,7 +50,7 @@ import { Project } from './projects/entities/project.entity';
         username: configService.get<string>('DATABASE_USER'),
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
-        entities: [User, Task, TaskActivity, Project],
+        entities: [User, Task, TaskActivity, Project, Comment],
         synchronize: true, // ডেভলপমেন্টের জন্য true, প্রোডাকশনে false রাখবেন
       }),
       inject: [ConfigService],
@@ -59,6 +61,7 @@ import { Project } from './projects/entities/project.entity';
     TasksModule,
     AuthModule,
     ProjectsModule,
+    CommentsModule,
   ],
   controllers: [],
   providers: [],

@@ -12,6 +12,7 @@ import {
 import { User } from '../../users/entities/user.entity';
 import { TaskActivity } from './task-activity.entity';
 import { Project } from '../../projects/entities/project.entity';
+import { Comment } from '../../comments/entities/comment.entity'; // Comment ইম্পোর্ট করুন
 
 export enum TaskStatus {
   TODO = 'todo',
@@ -71,4 +72,10 @@ export class Task {
   @ManyToMany(() => User, { eager: true }) // eager: true দিলে টাস্ক লোড করার সময় assignees-ও চলে আসবে
   @JoinTable() // TypeORM-কে একটি জয়েন টেবিল (task_assignees_user) তৈরি করতে বলে
   assignees: User[]; // এখন এটি একটি User অ্যারে
+
+  @OneToMany(() => Comment, (comment) => comment.task, {
+    eager: true,
+    cascade: true,
+  })
+  comments: Comment[]; // এই টাস্কের অধীনে থাকা কমেন্টগুলো
 }

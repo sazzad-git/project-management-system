@@ -23,7 +23,7 @@ export default function RootLayout({
         <StoreProvider>
           <AuthWrapper>
           <Header/>
-          {children}
+            {children}
           </AuthWrapper>
         </StoreProvider>
       </body>

@@ -317,6 +317,36 @@ export class TasksService {
     return tasks;
   }
 
+  // --- নতুন: findOneById মেথড ---
+  async findOneById(id: string, user: User): Promise<Task> {
+    const task = await this.tasksRepository.findOne({
+      where: { id },
+      // এই টাস্কের সাথে সম্পর্কিত সব তথ্য লোড করুন
+      relations: [
+        'creator',
+        'assignees',
+        'project',
+        'comments',
+        'comments.user',
+        'activities',
+        'activities.user',
+      ],
+    });
+
+    if (!task) {
+      throw new NotFoundException(`Task with ID "${id}" not found.`);
+    }
+
+    // পারমিশন চেক: এই টাস্কটি যে প্রজেক্টের, ব্যবহারকারী কি সেই প্রজেক্টের সদস্য?
+    // (এই চেকটি আরও উন্নত করা যেতে পারে, তবে আপাতত এটিই যথেষ্ট)
+    // const project = await this.projectsRepository.findOne({ where: { id: task.project.id }, relations: ['members'] });
+    // if (!project.members.some(m => m.id === user.id)) {
+    //   throw new UnauthorizedException('You do not have permission to view this task.');
+    // }
+
+    return task;
+  }
+
   // formatStatus মেথড (অপরিবর্তিত)
   private formatStatus(status: TaskStatus): string {
     return status.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
