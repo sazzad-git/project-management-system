@@ -12,6 +12,8 @@ import { ProjectsModule } from './projects/projects.module';
 import { Project } from './projects/entities/project.entity';
 import { CommentsModule } from './comments/comments.module'; // ১. CommentsModule ইম্পোর্ট করুন
 import { Comment } from './comments/entities/comment.entity'; // ২. Comment এনটিটি ইম্পোর্ট করুন
+import { EventsGateway } from './events/events.gateway';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -62,8 +64,9 @@ import { Comment } from './comments/entities/comment.entity'; // ২. Comment �
     AuthModule,
     ProjectsModule,
     CommentsModule,
+    EventsModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [EventsGateway],
 })
 export class AppModule {}

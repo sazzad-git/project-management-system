@@ -17,15 +17,12 @@ import {
 const Header = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-  // Header এখন শুধুমাত্র Redux স্টোর থেকে ডেটা পড়বে
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  // --- পেজ লোডে প্রোফাইল fetch করার useEffect হুকটি এখান থেকে মুছে ফেলা হয়েছে ---
-  // এই দায়িত্বটি এখন AuthWrapper পালন করবে, যা Race Condition প্রতিরোধ করবে।
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleLogout = () => {
     dispatch(logout());
@@ -33,7 +30,6 @@ const Header = () => {
     router.push("/login");
   };
 
-  // ড্রপডাউন মেনুর বাইরে ক্লিক করলে বন্ধ করার জন্য useEffect (এটি থাকবে)
   useEffect(() => {
     const closeDropdown = () => setIsDropdownOpen(false);
     if (isDropdownOpen) {
@@ -42,10 +38,22 @@ const Header = () => {
     return () => window.removeEventListener("click", closeDropdown);
   }, [isDropdownOpen]);
 
-  // আপনার সুন্দর ডিজাইন এবং UI লজিক সম্পূর্ণ অপরিবর্তিত
+  // সার্চ সাবমিট করার জন্য হ্যান্ডলার (আপডেটেড টাইপ সহ)
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    // এই লাইনটি পেজ রিলোড হওয়া প্রতিরোধ করে
+    e.preventDefault(); 
+    
+    if (!searchTerm.trim()) {
+      return; // যদি ইনপুট খালি থাকে, তাহলে কিছু করবে না
+    }
+
+    console.log("Searching for:", searchTerm);
+    router.push(`/search?q=${encodeURIComponent(searchTerm)}`);
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg">
-      {/* বাম অংশ */}
+      {/* বাম অংশ (অপরিবর্তিত) */}
       <div className="flex items-center gap-2">
         <FaProjectDiagram className="text-white drop-shadow-md" size={28} />
         <Link
@@ -56,15 +64,27 @@ const Header = () => {
         </Link>
       </div>
 
-      {/* মধ্যম অংশ */}
+      {/* মধ্যম অংশ (আপডেটেড) */}
       <div className="flex flex-1 justify-center px-4">
-        <div className="flex items-center w-full max-w-md px-4 py-2 bg-white/20 backdrop-blur-md rounded-full hover:bg-white/30 transition cursor-pointer">
+        <form
+          onSubmit={handleSearchSubmit}
+          className="flex items-center w-full max-w-md px-4 py-2 bg-white/20 backdrop-blur-md rounded-full hover:bg-white/30 transition"
+        >
           <FaSearch className="text-white opacity-80" />
-          <span className="ml-3 text-white opacity-80">Search projects...</span>
-        </div>
+          
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search projects..."
+            className="w-full ml-3 bg-transparent border-none text-white placeholder:text-white placeholder:opacity-80 focus:outline-none focus:ring-0"
+          />
+          {/* নির্ভরযোগ্য 'Enter' সাবমিশনের জন্য একটি অদৃশ্য বাটন */}
+          <button type="submit" className="hidden" aria-hidden="true"></button>
+        </form>
       </div>
 
-      {/* ডান অংশ */}
+      {/* ডান অংশ (অপরিবর্তিত) */}
       <div className="flex items-center gap-5">
         {isAuthenticated ? (
           <>

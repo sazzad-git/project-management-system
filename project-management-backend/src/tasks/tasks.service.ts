@@ -11,6 +11,7 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskActivity } from './entities/task-activity.entity';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { Project } from '../projects/entities/project.entity';
+import { EventsGateway } from '../events/events.gateway'; // EventsGateway ইম্পোর্ট করুন
 
 @Injectable()
 export class TasksService {
@@ -25,6 +26,8 @@ export class TasksService {
 
     @InjectRepository(Project) // Project Repository ইনজেক্ট করুন
     private projectsRepository: Repository<Project>,
+
+    private readonly eventsGateway: EventsGateway, // EventsGateway ইনজেক্ট করুন
   ) {}
 
   // findTasksForUser মেথড (এরর সমাধান করা হয়েছে)
@@ -109,17 +112,16 @@ export class TasksService {
     return reloadedTask;
   }
 
-  // updateStatus মেথড (এরর সমাধান করা হয়েছে)
+  // --- updateStatus মেথডের চূড়ান্ত এবং একমাত্র সংস্করণ ---
   async updateStatus(
     id: string,
     newStatus: TaskStatus,
     user: User,
   ): Promise<Task> {
     try {
-      // --- পরিবর্তনটি এখানে: findOne-এর পরিবর্তে findOneOrFail ব্যবহার করুন ---
       const task = await this.tasksRepository.findOneOrFail({
         where: { id },
-        relations: ['assignees', 'creator'],
+        relations: ['assignees', 'creator', 'project'], // project-কে relations-এ যোগ করুন
       });
 
       const isAssignedDeveloper =
@@ -154,15 +156,33 @@ export class TasksService {
 
       const reloadedTask = await this.tasksRepository.findOne({
         where: { id },
-        relations: ['assignees', 'creator', 'activities', 'activities.user'],
+        relations: [
+          'assignees',
+          'creator',
+          'project',
+          'activities',
+          'activities.user',
+        ],
       });
-      if (!reloadedTask) throw new NotFoundException('Could not reload task.'); // এই চেকটি এখনও ভালো
+      if (!reloadedTask) {
+        throw new NotFoundException('Could not reload task.');
+      }
+
+      // --- নতুন: WebSocket ইভেন্ট পাঠানো ---
+      // reloadedTask-এর project.id ব্যবহার করে সঠিক রুমে ইভেন্ট পাঠান
+      if (reloadedTask.project) {
+        this.eventsGateway.sendTaskUpdate(
+          reloadedTask.project.id,
+          reloadedTask,
+        );
+      }
+
       return reloadedTask;
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`Task with ID "${id}" not found`);
       }
-      throw error; // অন্যান্য এরর (যেমন UnauthorizedException) আবার থ্রো করুন
+      throw error;
     }
   }
 
