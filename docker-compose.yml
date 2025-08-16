@@ -1,29 +1,46 @@
 version: '3.8'
 services:
+  frontend:
+    build:
+      context: ./project-management-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      # এই URL-টি আপনার ডেপ্লয় করা ব্যাকএন্ডের URL হবে
+      - NEXT_PUBLIC_API_URL=https://your-backend-url.onrender.com
+    depends_on:
+      - backend
+
   backend:
     build:
       context: ./project-management-backend
       dockerfile: Dockerfile
     ports:
       - "3001:3001"
+    environment:
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - DATABASE_USER=${POSTGRES_USER}
+      - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+      - DATABASE_NAME=${POSTGRES_DB}
+      - JWT_SECRET=${JWT_SECRET}
+      # এই URL-টি আপনার ডেপ্লয় করা ফ্রন্টএন্ডের URL হবে
+      - FRONTEND_URL=https://your-frontend-url.onrender.com
+      - NODE_ENV=production
     depends_on:
       - db
-    environment:
-      DATABASE_HOST: db
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: javascript
-      DATABASE_NAME: demo_data
-      DATABASE_PORT: 5432
+
   db:
-    image: postgres:13
+    image: postgres:13-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: javascript
-      POSTGRES_DB: demo_data
-    ports:
-      - "5432:5432"
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
 volumes:
   postgres_data:
