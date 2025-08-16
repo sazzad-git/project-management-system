@@ -63,8 +63,6 @@ export class Task {
   dueDate: Date;
   @ManyToOne(() => User, { eager: true })
   assignee: User;
-  @Column('uuid', { array: true, nullable: true })
-  dependencies: string[];
 
   @ManyToOne(() => Project, (project) => project.tasks, { onDelete: 'CASCADE' })
   project: Project;
@@ -78,4 +76,15 @@ export class Task {
     cascade: true,
   })
   comments: Comment[]; // এই টাস্কের অধীনে থাকা কমেন্টগুলো
+
+  // --- গ্যান্ট চার্টের জন্য নতুন কলামগুলো ---
+  @Column({ type: 'timestamp', nullable: true }) // <-- nullable: true যোগ করুন
+  startDate: Date;
+
+  @Column({ type: 'int', nullable: true }) // <-- nullable: true যোগ করুন
+  duration: number;
+
+  // --- শুধুমাত্র dependencies-এর একটি সংস্করণ থাকবে ---
+  @Column('uuid', { array: true, default: '{}' }) // '{}' খালি অ্যারের জন্য ডিফল্ট মান
+  dependencies: string[];
 }

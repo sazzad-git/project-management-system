@@ -177,4 +177,45 @@ export class ProjectsService {
       await queryRunner.release();
     }
   }
+
+  async getGanttData(
+    projectId: string,
+    user: User,
+  ): Promise<{ data: any[]; links: any[] }> {
+    // প্রথমে প্রজেক্টটি খুঁজে বের করে পারমিশন চেক করুন
+    await this.findOne(projectId, user);
+
+    const project = await this.projectsRepository.findOne({
+      where: { id: projectId },
+      relations: ['tasks'],
+    });
+
+    if (!project) throw new NotFoundException('Project not found');
+
+    const data = project.tasks
+      .filter((task) => task.startDate && task.duration != null)
+      .map((task) => ({
+        id: task.id,
+        text: task.title,
+        start_date: task.startDate.toISOString().split('T')[0],
+        duration: task.duration,
+        progress: 0, // ডিফল্ট ভ্যালু
+      }));
+
+    const links: any[] = [];
+    project.tasks.forEach((task) => {
+      if (task.dependencies && task.dependencies.length > 0) {
+        task.dependencies.forEach((depId) => {
+          links.push({
+            id: `${depId}-${task.id}`,
+            source: depId,
+            target: task.id,
+            type: '0',
+          });
+        });
+      }
+    });
+
+    return { data, links };
+  }
 }

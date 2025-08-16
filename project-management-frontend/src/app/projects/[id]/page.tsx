@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { RootState, AppDispatch } from '../../../store/store';
 import { fetchTasksByProjectId, updateTaskStatus } from '../../../store/features/tasks/tasksSlice';
 import { Task } from '../../../store/features/tasks/tasksSlice';
 import TaskCard from '../../../components/TaskCard';
 import EditTaskModal from '../../../components/EditTaskModal';
 import CreateTaskFormModal from '../../../components/CreateTaskFormModal';
-import { useSocket } from '../../../hooks/useSocket'; // নতুন হুক ইম্পোর্ট
+import { useSocket } from '../../../hooks/useSocket';
 
 const columnTitles: { [key: string]: string } = {
   todo: 'To Do',
@@ -21,7 +22,11 @@ const ProjectDashboardPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const params = useParams();
   const router = useRouter();
-  const projectId = params.id as string;
+  
+  // --- সমাধান: projectId null হতে পারে, তাই সেটিকে হ্যান্ডেল করুন ---
+  const projectId = typeof params.id === 'string' ? params.id : null;
+
+  const socket = useSocket(projectId);
 
   const { tasks, status: tasksStatus, error } = useSelector((state: RootState) => state.tasks);
   const { user, status: authStatus } = useSelector((state: RootState) => state.auth);
@@ -31,15 +36,11 @@ const ProjectDashboardPage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  // --- নতুন: WebSocket কানেকশন ---
-  const socket = useSocket(projectId);
-
   useEffect(() => {
+    // --- সমাধান: নিশ্চিত করুন যে projectId একটি ভ্যালিড string ---
     if (authStatus === 'succeeded' && projectId) {
-      // টাস্ক ফেচ
       dispatch(fetchTasksByProjectId(projectId));
-
-      // প্রজেক্ট ডিটেইলস ফেচ
+      
       const fetchProjectDetails = async () => {
         const token = localStorage.getItem('token');
         try {
@@ -54,21 +55,18 @@ const ProjectDashboardPage = () => {
           }
         } catch (err) {
           console.error("Failed to fetch project details", err);
-          router.push('/projects');
+          router.push('/projects'); 
         }
       };
       fetchProjectDetails();
     }
   }, [authStatus, projectId, dispatch, router]);
 
-  // --- নতুন: WebSocket ইভেন্ট লিসেন ---
   useEffect(() => {
     if (socket) {
       socket.on('taskUpdated', (updatedTask: Task) => {
-        console.log('Received task update from server:', updatedTask);
         dispatch(updateTaskStatus(updatedTask));
       });
-
       return () => {
         socket.off('taskUpdated');
       };
@@ -79,7 +77,6 @@ const ProjectDashboardPage = () => {
     setSelectedTask(task);
     setIsEditModalOpen(true);
   };
-
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
     setSelectedTask(null);
@@ -93,45 +90,53 @@ const ProjectDashboardPage = () => {
 
   const canCreateTask = user?.role === 'admin' || user?.role === 'project_manager';
 
-  if (authStatus !== 'succeeded' || !project) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-lg">Loading Project...</p>
-      </div>
-    );
+  // --- সমাধান: অথেনটিকেশন বা projectId লোড না হওয়া পর্যন্ত লোডিং স্ক্রিন দেখান ---
+  if (authStatus !== 'succeeded' || !projectId) {
+    return <div className="flex justify-center items-center h-screen"><p className="text-lg">Loading Project...</p></div>;
   }
-
+  
+  // project স্টেট লোড না হওয়া পর্যন্ত একটি ভিন্ন লোডার দেখান
+  if (!project) {
+    return <div className="flex justify-center items-center h-screen"><p className="text-lg">Fetching Project Details...</p></div>;
+  }
+  
   return (
     <div className="p-4 md:p-6 mt-[70px]">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <h1 className="text-3xl font-bold text-gray-800">{project.name} - Task Board</h1>
-        {canCreateTask && (
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md"
+        
+        <div className="flex items-center gap-2">
+          <Link 
+            href={`/projects/${projectId}/timeline`} 
+            className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition"
           >
-            + New Task
-          </button>
-        )}
+            View Timeline
+          </Link>
+          
+          {canCreateTask && (
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md"
+            >
+              + New Task
+            </button>
+          )}
+        </div>
       </div>
 
       {tasksStatus === 'loading' || tasksStatus === 'idle' ? (
         <p className="text-center text-gray-500 py-10">Loading tasks...</p>
       ) : tasksStatus === 'succeeded' ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {Object.keys(columns).map(columnId => (
+          {(Object.keys(columns) as Array<keyof typeof columns>).map(columnId => (
             <div key={columnId} className="p-4 bg-gray-50 rounded-lg shadow-inner min-h-[300px]">
               <h2 className="font-bold mb-4 text-center text-gray-700 uppercase">
                 {columnTitles[columnId]} ({columns[columnId].length})
               </h2>
               <div className="space-y-3">
-                {columns[columnId].length > 0 ? (
-                  columns[columnId].map(task => (
-                    <TaskCard key={task.id} task={task} onEditClick={handleOpenEditModal} />
-                  ))
-                ) : (
-                  <p className="text-sm text-center text-gray-400 mt-10">No tasks in this column.</p>
-                )}
+                {columns[columnId].map(task => (
+                  <TaskCard key={task.id} task={task} onEditClick={handleOpenEditModal} />
+                ))}
               </div>
             </div>
           ))}
@@ -140,7 +145,6 @@ const ProjectDashboardPage = () => {
         <p className="text-center text-red-500 py-10">{error}</p>
       )}
 
-      {/* Create Task Modal */}
       <CreateTaskFormModal 
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -150,8 +154,6 @@ const ProjectDashboardPage = () => {
         }}
         projectId={projectId}
       />
-
-      {/* Edit Task Modal */}
       {selectedTask && (
         <EditTaskModal 
           isOpen={isEditModalOpen}

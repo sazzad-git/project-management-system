@@ -14,6 +14,7 @@ import { CommentsModule } from './comments/comments.module'; // ১. CommentsMod
 import { Comment } from './comments/entities/comment.entity'; // ২. Comment এনটিটি ইম্পোর্ট করুন
 import { EventsGateway } from './events/events.gateway';
 import { EventsModule } from './events/events.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { EventsModule } from './events/events.module';
     ProjectsModule,
     CommentsModule,
     EventsModule,
+    SearchModule,
   ],
   controllers: [],
   providers: [EventsGateway],

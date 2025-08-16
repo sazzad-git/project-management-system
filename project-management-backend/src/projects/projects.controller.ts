@@ -64,4 +64,10 @@ export class ProjectsController {
   remove(@Param('id') id: string, @Request() req) {
     return this.projectsService.remove(id, req.user);
   }
+
+  // --- নতুন: গ্যান্ট চার্টের জন্য এন্ডপয়েন্ট ---
+  @Get(':id/gantt')
+  getGanttData(@Param('id') id: string, @Request() req) {
+    return this.projectsService.getGanttData(id, req.user);
+  }
 }
