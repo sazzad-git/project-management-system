@@ -1,23 +1,22 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-// State-এর টাইপ
 interface AuthState {
   user: any | null;
   token: string | null;
   isAuthenticated: boolean;
-  status: "idle" | "loading" | "succeeded" | "failed"; // নতুন লোডিং স্টেট
+  status: "idle" | "loading" | "succeeded" | "failed";
 }
 
 const initialState: AuthState = {
   user: null,
   token: null,
   isAuthenticated: false,
-  status: "idle", // প্রাথমিক স্ট্যাটাস 'idle'
+  status: "idle",
 };
 
 const authSlice = createSlice({
   name: "auth",
-  initialState, // initialState এখানে ব্যবহার করা হচ্ছে
+  initialState,
   reducers: {
     authLoading(state) {
       state.status = "loading";
@@ -33,10 +32,9 @@ const authSlice = createSlice({
       state.token = null;
       localStorage.removeItem("token");
 
-      // status-কে একটি চূড়ান্ত অবস্থায় পরিবর্তন করুন
       state.status = "failed";
     },
-    // স্টেট পুনরুদ্ধার করার জন্য একটি নতুন action
+
     setAuthState(state, action: PayloadAction<{ user: any; token: string }>) {
       state.isAuthenticated = true;
       state.user = action.payload.user;

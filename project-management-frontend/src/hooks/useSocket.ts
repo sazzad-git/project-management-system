@@ -15,11 +15,11 @@ export const useSocket = (roomId: string | null): Socket | null => {
 
     setSocket(newSocket);
 
-    // সার্ভারে 'joinProjectRoom' ইভেন্ট পাঠান
+    // Server 'joinProjectRoom'
     newSocket.emit("joinProjectRoom", roomId);
 
     return () => {
-      // কম্পোনেন্ট আনমাউন্ট হওয়ার সময় 'leaveProjectRoom' ইভেন্ট পাঠান এবং কানেকশন বন্ধ করুন
+      
       newSocket.emit("leaveProjectRoom", roomId);
       newSocket.close();
     };

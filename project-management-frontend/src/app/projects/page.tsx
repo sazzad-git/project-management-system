@@ -66,7 +66,7 @@ const ProjectsPage = () => {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
       });
-      fetchProjects(); // ডিলিট করার পর প্রজেক্ট লিস্ট রিফ্রেশ করুন
+      fetchProjects(); // Refresh Delete list
     } catch (err) {
       console.error("Failed to delete project", err);
     }
@@ -92,7 +92,7 @@ const ProjectsPage = () => {
       {projects.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map(project => {
-            // পারমিশন চেক: শুধুমাত্র Admin বা প্রজেক্টের স্রষ্টাই এডিট/ডিলিট করতে পারবে
+            // Only admin can Edit delete
             const canManageProject = user?.role === 'admin' || user?.id === project.creator?.id;
 
             return (

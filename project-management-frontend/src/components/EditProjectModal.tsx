@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-// একটি গ্লোবাল টাইপ ফাইল (যেমন src/types.ts) তৈরি করে সেখানে এই টাইপগুলো রাখা ভালো
+// Global type
 interface User {
   id: string;
   name: string;
@@ -32,7 +32,7 @@ const EditProjectModal = ({ project, isOpen, onClose, onSuccess }: EditProjectMo
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [error, setError] = useState('');
 
-  // যখন `project` prop পরিবর্তন হবে (অর্থাৎ মডালটি খুলবে), তখন ফর্মের স্টেট আপডেট করুন
+  // If change project prop
   useEffect(() => {
     if (project) {
       setFormData({
@@ -43,7 +43,7 @@ const EditProjectModal = ({ project, isOpen, onClose, onSuccess }: EditProjectMo
     }
   }, [project]);
 
-  // সকল ইউজার fetch করুন, যাতে মেম্বারদের তালিকা থেকে সিলেক্ট করা যায়
+  // All user fetch here
   useEffect(() => {
     const fetchUsers = async () => {
       const token = localStorage.getItem('token');
@@ -77,7 +77,7 @@ const EditProjectModal = ({ project, isOpen, onClose, onSuccess }: EditProjectMo
     setError('');
     const token = localStorage.getItem('token');
     
-    // শুধুমাত্র যে ফিল্ডগুলো পরিবর্তন হয়েছে সেগুলো পাঠানো ভালো, তবে সম্পূর্ণটা পাঠানোও কাজ করবে
+    
     const updatePayload = {
       name: formData.name,
       description: formData.description,
@@ -95,7 +95,7 @@ const EditProjectModal = ({ project, isOpen, onClose, onSuccess }: EditProjectMo
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to update project");
-      onSuccess(); // সফল হলে প্যারেন্ট কম্পোনেন্টকে জানান
+      onSuccess();
     } catch (err: any) {
       setError(err.message);
     }

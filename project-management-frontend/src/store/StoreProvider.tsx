@@ -1,4 +1,4 @@
-"use client"; // এই লাইনটি এটিকে একটি ক্লায়েন্ট কম্পোনেন্টে পরিণত করে
+"use client";
 
 import { Provider } from "react-redux";
 import { store } from "./store";

@@ -4,8 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-// একটি গ্লোবাল types ফাইল (যেমন src/types.ts) তৈরি করে সেখানে এই টাইপগুলো রাখা ভালো
-// আপাতত, আমরা এগুলো এখানেই ডিফাইন করছি
+
 interface Project {
   id: string;
   name: string;
@@ -16,7 +15,7 @@ interface Task {
   id: string;
   title: string;
   description: string;
-  project: Project | null; // project এখন null হতে পারে
+  project: Project | null;
 }
 
 interface SearchResult {
@@ -33,7 +32,7 @@ const SearchResultsContent = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // যদি কোনো সার্চ কোয়েরি না থাকে, তাহলে কিছু করার দরকার নেই
+    
     if (!query) {
       setIsLoading(false);
       setResults(null);
@@ -82,7 +81,7 @@ const SearchResultsContent = () => {
     <div>
       <h1 className="text-3xl font-bold mb-6">Search Results for "{query}"</h1>
       
-      {/* প্রজেক্টের ফলাফল */}
+      {/* Project Search find */}
       {results.projects.length > 0 && (
         <div className="mb-8">
           <h2 className="text-2xl font-semibold mb-4 border-b pb-2">Projects ({results.projects.length})</h2>
@@ -99,13 +98,13 @@ const SearchResultsContent = () => {
         </div>
       )}
 
-      {/* টাস্কের ফলাফল */}
+      {/* Task Find */}
       {results.tasks.length > 0 && (
         <div>
           <h2 className="text-2xl font-semibold mb-4 border-b pb-2">Tasks ({results.tasks.length})</h2>
           <div className="space-y-4">
             {results.tasks.map(task => (
-              // --- সমাধানটি এখানে: task.project আছে কিনা তা চেক করুন ---
+              
               task.project ? (
                 <Link key={task.id} href={`/projects/${task.project.id}/tasks/${task.id}`}>
                   <div className="block p-4 bg-white rounded-lg shadow-sm hover:shadow-lg hover:border-blue-400 border transition-all duration-200">
@@ -117,7 +116,7 @@ const SearchResultsContent = () => {
                   </div>
                 </Link>
               ) : (
-                // যদি task.project না থাকে, তাহলে একটি নন-লিংক div দেখান
+                
                 <div key={task.id} className="p-4 bg-gray-100 rounded-lg shadow-sm opacity-80">
                   <h3 className="font-bold">{task.title}</h3>
                   <p className="text-sm text-gray-600 mt-1">{task.description}</p>
@@ -134,7 +133,7 @@ const SearchResultsContent = () => {
   );
 };
 
-// Suspense ব্যবহার করা সেরা অনুশীলন
+
 const SearchPage = () => {
   return (
     <div className="p-4 md:p-6 mt-[70px]">

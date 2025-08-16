@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Task } from '../store/features/tasks/tasksSlice';
-import { Comment } from '../types'; // একটি গ্লোবাল types ফাইলে Comment টাইপ ডিফাইন করুন
+import { Comment } from '../types'; 
 
 interface TaskDetailModalProps {
   task: Task;
@@ -29,8 +29,8 @@ const TaskDetailModal = ({ task, isOpen, onClose, onCommentAdded }: TaskDetailMo
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
-      onCommentAdded(task.id, data); // Redux স্টোর আপডেটের জন্য
-      setNewComment(''); // ইনপুট ফিল্ড খালি করুন
+      onCommentAdded(task.id, data); 
+      setNewComment(''); 
     } catch (err) {
       console.error("Failed to post comment", err);
     }
@@ -44,7 +44,7 @@ const TaskDetailModal = ({ task, isOpen, onClose, onCommentAdded }: TaskDetailMo
         <h2 className="text-2xl font-bold mb-4">{task.title}</h2>
         <p className="mb-4">{task.description}</p>
         
-        {/* কমেন্ট সেকশন */}
+        {/* Comment section */}
         <div className="mt-6">
           <h3 className="font-bold mb-2">Comments</h3>
           <div className="space-y-4 max-h-60 overflow-y-auto">

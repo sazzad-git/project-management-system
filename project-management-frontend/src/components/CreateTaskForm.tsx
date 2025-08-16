@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-// টাইপ ডেফিনিশন
+// Type defination
 interface User {
   id: string;
   name: string;
@@ -15,7 +15,7 @@ interface CreateTaskFormProps {
 }
 
 const CreateTaskForm = ({ onSuccess, projectId }: CreateTaskFormProps) => {
-  // ফর্মের ডেটার জন্য একটি একক স্টেট অবজেক্ট ব্যবহার করা সহজতর
+  //For form data
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -29,7 +29,7 @@ const CreateTaskForm = ({ onSuccess, projectId }: CreateTaskFormProps) => {
   const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState('');
 
-  // সকল ইউজার fetch করুন
+  // user fetch
   useEffect(() => {
     const fetchUsers = async () => {
       const token = localStorage.getItem('token');
@@ -61,14 +61,14 @@ const CreateTaskForm = ({ onSuccess, projectId }: CreateTaskFormProps) => {
     setError('');
     const token = localStorage.getItem('token');
     
-    // duration-কে সংখ্যায় রূপান্তর করুন এবং projectId যোগ করুন
+    
     const submissionData = {
       ...formData,
       duration: Number(formData.duration),
       projectId,
     };
     
-    // যদি কোনো ঐচ্ছিক ফিল্ড খালি থাকে, তাহলে সেটিকে payload থেকে বাদ দিন
+    
     if (!submissionData.dueDate) delete (submissionData as any).dueDate;
 
     try {

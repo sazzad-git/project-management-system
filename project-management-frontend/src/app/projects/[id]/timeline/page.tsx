@@ -3,20 +3,20 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import dynamic from 'next/dynamic'; // ১. dynamic ইম্পোর্ট করুন
+import dynamic from 'next/dynamic'; 
 
-// --- ২. GanttChart কম্পোনেন্টটিকে ডাইনামিকভাবে লোড করুন ---
-// এটি নিশ্চিত করে যে কম্পোনেন্টটি শুধুমাত্র ক্লায়েন্ট-সাইডে রেন্ডার হবে
+
+// GanttChart here
 const GanttChart = dynamic(() => import('../../../../components/GanttChart'), {
-  ssr: false, // সার্ভার-সাইড রেন্ডারিং বন্ধ করুন
-  loading: () => <p className="text-center text-gray-500 py-10">Loading Chart...</p> // চার্ট লোড হওয়ার সময় একটি লোডার দেখান
+  ssr: false, 
+  loading: () => <p className="text-center text-gray-500 py-10">Loading Chart...</p> 
 });
 
 const TimelinePage = () => {
   const params = useParams();
   const router = useRouter();
   
-  // URL থেকে projectId নিন
+  
   const projectId = typeof params.id === 'string' ? params.id : null;
 
   const [ganttData, setGanttData] = useState<{ data: any[], links: any[] } | null>(null);
@@ -24,7 +24,7 @@ const TimelinePage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // projectId ভ্যালিড হলেই শুধুমাত্র ডেটা fetch করুন
+    
     if (projectId) {
       const fetchGanttData = async () => {
         setIsLoading(true);
@@ -50,12 +50,12 @@ const TimelinePage = () => {
       };
       fetchGanttData();
     } else {
-      // যদি কোনো কারণে projectId না পাওয়া যায়
+      
       setIsLoading(false);
     }
   }, [projectId]);
 
-  // কন্টেন্ট রেন্ডার করার জন্য একটি ফাংশন
+  
   const renderContent = () => {
     if (isLoading) {
       return <p className="text-center text-gray-500 py-10">Loading timeline data...</p>;

@@ -6,7 +6,7 @@ import { RootState } from '../store/store';
 import { FaArrowRight, FaTasks, FaUsers, FaChartLine } from 'react-icons/fa';
 
 const HomePage = () => {
-  // ব্যবহারকারী লগইন করা আছে কিনা তা চেক করুন
+  // check Is in login user 
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   return (
@@ -21,12 +21,12 @@ const HomePage = () => {
         </p>
         <div className="mt-8 flex justify-center gap-4">
           {isAuthenticated ? (
-            // যদি লগইন করা থাকে, তাহলে প্রজেক্ট পেজে যাওয়ার বাটন দেখান
+            // If not login then show this 
             <Link href="/projects" className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-105 flex items-center gap-2">
               Go to Your Projects <FaArrowRight />
             </Link>
           ) : (
-            // যদি লগইন করা না থাকে
+            
             <>
               <Link href="/signup" className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-105 flex items-center gap-2">
                 Get Started for Free <FaArrowRight />

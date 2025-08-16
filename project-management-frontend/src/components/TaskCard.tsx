@@ -64,7 +64,7 @@ const TaskCard = ({ task, onEditClick }: TaskCardProps) => {
     }
   };
 
-  // পারমিশন চেক (অপরিবর্তিত)
+  
   const canUpdateStatus = 
     user?.role === 'admin' ||
     user?.role === 'project_manager' ||
@@ -148,7 +148,7 @@ const TaskCard = ({ task, onEditClick }: TaskCardProps) => {
           )}
         </div>
 
-        {/* --- Activity এবং Comments সেকশন --- */}
+        {/* --- Activity and Comments Section--- */}
         <div className="mt-4 pt-3 border-t border-gray-100">
           <div className="flex justify-between items-center text-xs text-gray-400">
             <span>Created: {formatDate(task.createdAt)}</span>

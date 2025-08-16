@@ -23,7 +23,7 @@ const ProjectDashboardPage = () => {
   const params = useParams();
   const router = useRouter();
   
-  // --- সমাধান: projectId null হতে পারে, তাই সেটিকে হ্যান্ডেল করুন ---
+ 
   const projectId = typeof params.id === 'string' ? params.id : null;
 
   const socket = useSocket(projectId);
@@ -37,7 +37,7 @@ const ProjectDashboardPage = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   useEffect(() => {
-    // --- সমাধান: নিশ্চিত করুন যে projectId একটি ভ্যালিড string ---
+    
     if (authStatus === 'succeeded' && projectId) {
       dispatch(fetchTasksByProjectId(projectId));
       
@@ -90,12 +90,12 @@ const ProjectDashboardPage = () => {
 
   const canCreateTask = user?.role === 'admin' || user?.role === 'project_manager';
 
-  // --- সমাধান: অথেনটিকেশন বা projectId লোড না হওয়া পর্যন্ত লোডিং স্ক্রিন দেখান ---
+  // Loader
   if (authStatus !== 'succeeded' || !projectId) {
     return <div className="flex justify-center items-center h-screen"><p className="text-lg">Loading Project...</p></div>;
   }
   
-  // project স্টেট লোড না হওয়া পর্যন্ত একটি ভিন্ন লোডার দেখান
+  // Another loader
   if (!project) {
     return <div className="flex justify-center items-center h-screen"><p className="text-lg">Fetching Project Details...</p></div>;
   }

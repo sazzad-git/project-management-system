@@ -7,7 +7,7 @@ import { RootState, AppDispatch } from '../../../../../store/store';
 import { Task, Comment } from '../../../../../store/features/tasks/tasksSlice';
 import { addCommentToTask, deleteTaskSuccess, updateTaskStatus } from '../../../../../store/features/tasks/tasksSlice';
 import { FaUserCircle } from 'react-icons/fa';
-import EditTaskModal from '../../../../../components/EditTaskModal'; // EditTaskModal ইম্পোর্ট করুন
+import EditTaskModal from '../../../../../components/EditTaskModal';
 
 const TaskDetailPage = () => {
   const params = useParams();
@@ -22,12 +22,12 @@ const TaskDetailPage = () => {
   const [error, setError]         = useState('');
   const [newCommentText, setNewCommentText] = useState('');
 
-  // Edit Modal-এর জন্য স্টেট
+  // Edit Modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const { user } = useSelector((state: RootState) => state.auth);
 
-  // useCallback ব্যবহার করে fetchTaskDetails ফাংশনটিকে মেমোাইজ করা হলো
+  
   const fetchTaskDetails = useCallback(async () => {
     const token = localStorage.getItem('token');
     try {
@@ -103,7 +103,7 @@ const TaskDetailPage = () => {
   if (error) return <div className="p-10 text-center text-red-500 mt-[70px]">Error: {error}</div>;
   if (!task) return <div className="p-10 text-center mt-[70px]">Task not found.</div>;
 
-  // পারমিশন চেক (ডিলিট/এডিট বাটনের জন্য)
+  // For delete edit button
   const canManageTask = user?.role === 'admin' || user?.id === task.creator?.id;
 
   return (
@@ -132,7 +132,7 @@ const TaskDetailPage = () => {
           
           <p className="my-6 text-gray-700 whitespace-pre-wrap">{task.description}</p>
           
-          {/* কমেন্ট সেকশন */}
+          {/* Comment Section */}
           <div className="mt-8 border-t pt-6">
             <h3 className="text-xl font-semibold mb-4 text-gray-700">Comments ({task.comments?.length || 0})</h3>
             <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
@@ -171,7 +171,7 @@ const TaskDetailPage = () => {
           task={task}
           onClose={() => setIsEditModalOpen(false)}
           onSuccess={(updatedTask) => {
-            // এই পেজের লোকাল স্টেট এবং Redux উভয়কেই আপডেট করুন
+           
             setTask(updatedTask);
             dispatch(updateTaskStatus(updatedTask));
             setIsEditModalOpen(false);

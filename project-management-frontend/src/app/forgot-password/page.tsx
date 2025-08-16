@@ -29,11 +29,9 @@ const ForgotPasswordPage = () => {
         throw new Error(data.message || "Something went wrong. Please try again.");
       }
       
-      // ডেভেলপমেন্টের জন্য, আমরা ব্যাকএন্ড থেকে আসা টোকেনটি কনসোলে দেখাতে পারি
-      // console.log("Reset Token:", data.resetToken); // এই লাইনটি শুধুমাত্র পরীক্ষার জন্য
 
       setMessage("If an account with that email exists, a password reset link has been sent.");
-      setEmail(""); // ইনপুট ফিল্ড খালি করে দিন
+      setEmail(""); 
 
     } catch (err: any) {
       setError(err.message);
@@ -61,7 +59,7 @@ const ForgotPasswordPage = () => {
           </p>
         )}
 
-        {!message && ( // যদি সফলতার মেসেজ না থাকে, তাহলেই ফর্ম দেখান
+        {!message && ( 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label

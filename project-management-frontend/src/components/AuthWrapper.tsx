@@ -14,7 +14,7 @@ const AuthWrapper = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated, status: authStatus } = useSelector((state: RootState) => state.auth);
 
-  // পেজ লোড হওয়ার সময় অথেনটিকেশন স্টেট চেক করা
+  // Authentication check
   useEffect(() => {
     if (authStatus === 'idle') {
       const token = localStorage.getItem('token');
@@ -45,38 +45,37 @@ const AuthWrapper = ({ children }: { children: React.ReactNode }) => {
   const isPublic = publicRoutes.includes(pathname) || pathname.startsWith('/reset-password/');
   const isCheckDone = authStatus === 'succeeded' || authStatus === 'failed';
 
-  // রিডাইরেকশন লজিক
+  // Redirection
   useEffect(() => {
     if (isCheckDone) {
-      // যদি লগইন করা না থাকে এবং সুরক্ষিত পেজে যাওয়ার চেষ্টা করে
+      
       if (!isAuthenticated && !isPublic) {
         router.push('/login');
       }
-      // যদি লগইন করা থাকে এবং লগইন/সাইনআপ পেজে যাওয়ার চেষ্টা করে
+      
       if (isAuthenticated && (pathname === '/login' || pathname === '/signup' || pathname === '/register')) {
         router.push('/projects');
       }
     }
   }, [isAuthenticated, isCheckDone, isPublic, pathname, router]);
 
-  // --- চূড়ান্ত রেন্ডারিং লজিক ---
+  // --- Final rendering ---
 
-  // যদি প্রাথমিক চেক সম্পন্ন না হয়
   if (!isCheckDone) {
     return <div className="flex justify-center items-center h-screen"><p className="text-lg">Loading...</p></div>;
   }
 
-  // যদি লগইন করা না থাকে এবং সুরক্ষিত পেজে থাকে (রিডাইরেক্ট হওয়ার অপেক্ষায়)
+ 
   if (!isAuthenticated && !isPublic) {
     return <div className="flex justify-center items-center h-screen"><p className="text-lg">Redirecting to Login...</p></div>;
   }
 
-  // যদি লগইন করা থাকে এবং পাবলিক পেজে থাকে (রিডাইরেক্ট হওয়ার অপেক্ষায়)
+  
   if (isAuthenticated && isPublic && pathname !== '/') {
     return <div className="flex justify-center items-center h-screen"><p className="text-lg">Redirecting to Projects...</p></div>;
   }
   
-  // অন্য সব সঠিক পরিস্থিতিতে (যেমন, হোমপেজ দেখা, সুরক্ষিত পেজ দেখা) children রেন্ডার করুন
+  
   return <>{children}</>;
 };
 

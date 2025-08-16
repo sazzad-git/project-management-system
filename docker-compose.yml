@@ -7,7 +7,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # এই URL-টি আপনার ডেপ্লয় করা ব্যাকএন্ডের URL হবে
+     # This Url is Backend deploy url
       - NEXT_PUBLIC_API_URL=https://your-backend-url.onrender.com
     depends_on:
       - backend
@@ -25,7 +25,7 @@ services:
       - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
       - DATABASE_NAME=${POSTGRES_DB}
       - JWT_SECRET=${JWT_SECRET}
-      # এই URL-টি আপনার ডেপ্লয় করা ফ্রন্টএন্ডের URL হবে
+      # This Url is frontend deploy url
       - FRONTEND_URL=https://your-frontend-url.onrender.com
       - NODE_ENV=production
     depends_on:

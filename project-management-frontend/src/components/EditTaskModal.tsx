@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Task } from '../store/features/tasks/tasksSlice';
 
-// User টাইপটি এখানে সরাসরি ডিফাইন করা হলো
+// User Type
 interface User {
   id: string;
   name: string;
@@ -18,7 +18,7 @@ interface EditTaskModalProps {
 }
 
 const EditTaskModal = ({ task, isOpen, onClose, onSuccess }: EditTaskModalProps) => {
-  // ফর্মের ডেটা এখন একটি একক স্টেট অবজেক্টে রাখা হয়েছে
+  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -27,8 +27,7 @@ const EditTaskModal = ({ task, isOpen, onClose, onSuccess }: EditTaskModalProps)
   const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState('');
 
-  // যখন `task` prop পরিবর্তন হবে (অর্থাৎ, যখন মডালটি খোলা হবে),
-  // তখন ফর্মের স্টেটকে বর্তমান টাস্কের ডেটা দিয়ে পূরণ করুন
+  
   useEffect(() => {
     if (task) {
       setFormData({
@@ -39,7 +38,7 @@ const EditTaskModal = ({ task, isOpen, onClose, onSuccess }: EditTaskModalProps)
     }
   }, [task]);
 
-  // কম্পোনেন্টটি প্রথমবার মাউন্ট হওয়ার সময় সকল ইউজারকে fetch করুন
+  
   useEffect(() => {
     const fetchUsers = async () => {
       const token = localStorage.getItem('token');
@@ -57,9 +56,9 @@ const EditTaskModal = ({ task, isOpen, onClose, onSuccess }: EditTaskModalProps)
 
   if (!isOpen) return null;
 
-  // ফর্মের ইনপুট পরিবর্তনের জন্য হ্যান্ডলার
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    // মাল্টি-সিলেক্টের জন্য বিশেষ হ্যান্ডলিং
+    
     if (e.target.name === 'assigneeIds') {
       const selectedIds = Array.from((e.target as HTMLSelectElement).selectedOptions, option => option.value);
       setFormData({ ...formData, assigneeIds: selectedIds });
@@ -68,7 +67,7 @@ const EditTaskModal = ({ task, isOpen, onClose, onSuccess }: EditTaskModalProps)
     }
   };
 
-  // ফর্ম সাবমিট করার জন্য হ্যান্ডলার
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -81,7 +80,7 @@ const EditTaskModal = ({ task, isOpen, onClose, onSuccess }: EditTaskModalProps)
       });
       const updatedTask = await response.json();
       if (!response.ok) throw new Error(updatedTask.message || 'Failed to update task');
-      onSuccess(updatedTask); // সফল হলে ড্যাশবোর্ডকে জানান
+      onSuccess(updatedTask); 
     } catch (err: any) {
       setError(err.message);
     }
@@ -95,7 +94,7 @@ const EditTaskModal = ({ task, isOpen, onClose, onSuccess }: EditTaskModalProps)
           <button onClick={onClose} className="text-2xl font-bold hover:text-red-500">&times;</button>
         </div>
 
-        {/* --- CreateTaskForm-এর ডিজাইনের উপর ভিত্তি করে নতুন ফর্ম --- */}
+        {/* --- CreateTaskForm- with new form --- */}
         <form onSubmit={handleSubmit} className="bg-white w-full space-y-4">
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
-// loginSuccess-এর পরিবর্তে setAuthState ইম্পোর্ট করুন (অথবা loginSuccess-কেই আপডেট করুন)
+
 import { setAuthState } from "../../store/features/auth/authSlice";
 import Link from "next/link";
 
@@ -13,7 +13,7 @@ const LoginPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   const dispatch = useDispatch();
-  const router = useRouter(); // যদিও আমরা push ব্যবহার করব না, রাউটার অবজেক্টটি রাখা যেতে পারে
+  const router = useRouter(); 
 
  const handleLogin = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -26,15 +26,15 @@ const LoginPage = () => {
       body: JSON.stringify({ email, password }),
     });
 
-    // ১. রেসপন্স বডি একবার পড়ুন এবং একটি ভেরিয়েবলে সেভ করুন
+    
     const data = await response.json();
 
     if (!response.ok) {
       throw new Error(data.message || 'Login failed');
     }
-    // ২. টোকেন এবং ইউজার প্রোফাইল তথ্য নিন
+    
     const token = data.access_token;
-    const userProfile = data.user; // আপনার ব্যাকএন্ড থেকে ইউজার তথ্য আসার কথা
+    const userProfile = data.user; 
 
     localStorage.setItem("token", token);
     dispatch(setAuthState({ token: token, user: userProfile }));
@@ -50,7 +50,7 @@ const LoginPage = () => {
           Login to ProjectFlow
         </h1>
         <form onSubmit={handleLogin} className="space-y-5">
-          {/* আপনার ফর্মের বাকি অংশ অপরিবর্তিত থাকবে */}
+          
           <div>
             <label
               htmlFor="email"

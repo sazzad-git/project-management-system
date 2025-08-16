@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
-// নতুন: Comment টাইপ
+//  Comment Type
 export interface Comment {
   id: string;
   text: string;
@@ -11,59 +11,53 @@ export interface Comment {
   };
 }
 
-// Task-এর জন্য একটি টাইপ ডিফাইন করুন
-// আমরা এখানে assignee যোগ করব, কারণ API থেকে এই তথ্যটি আসে
+// Task type
 export interface Task {
   id: string;
   title: string;
   description: string;
   status: "todo" | "in_progress" | "done";
-  createdAt: string; // createdAt যোগ করুন
+  createdAt: string;
   assignee?: {
     id: string;
     name: string;
   };
   creator?: {
-    // creator ঐচ্ছিক হতে পারে
     id: string;
     name: string;
   };
   assignees?: { id: string; name: string }[];
-  activities?: TaskActivity[]; // activities অ্যারে যোগ করুন
+  activities?: TaskActivity[];
   comments?: Comment[];
 }
 
 export interface TaskActivity {
   id: string;
   description: string;
-  createdAt: string; // API থেকে ডেট স্ট্রিং হিসেবে আসে
+  createdAt: string;
   user: {
     name: string;
   };
 }
 
-// State-এর টাইপ ডিফাইন করুন
 interface TasksState {
   tasks: Task[];
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 }
 
-// প্রাথমিক স্টেট
 const initialState: TasksState = {
   tasks: [],
   status: "idle",
   error: null,
 };
 
-// API থেকে ডেটা আনার জন্য একটি async thunk
 export const fetchTasksByProjectId = createAsyncThunk(
   "tasks/fetchByProject",
   async (projectId: string, { rejectWithValue }) => {
     const token = localStorage.getItem("token");
     if (!token) return rejectWithValue("No token found");
     try {
-      // এই নতুন এন্ডপয়েন্টটি আমাদের ব্যাকএন্ডে তৈরি করতে হবে
       const response = await fetch(
         `http://localhost:3001/projects/${projectId}/tasks`,
         {
@@ -84,12 +78,11 @@ export const fetchTasksByProjectId = createAsyncThunk(
   }
 );
 
-// Slice তৈরি করুন
+// Slice Create
 const tasksSlice = createSlice({
   name: "tasks",
   initialState,
   reducers: {
-    // আপনার পুরনো রিডিউসারগুলো এখানে থাকবে
     updateTaskStatus: (state, action: PayloadAction<Task>) => {
       const index = state.tasks.findIndex(
         (task) => task.id === action.payload.id
@@ -101,7 +94,7 @@ const tasksSlice = createSlice({
     deleteTaskSuccess: (state, action: PayloadAction<string>) => {
       state.tasks = state.tasks.filter((task) => task.id !== action.payload);
     },
-    // আপনি চাইলে টাস্ক তৈরি করার পর fetch না করে, ম্যানুয়ালি যোগ করতে পারেন
+
     addTaskSuccess: (state, action: PayloadAction<Task>) => {
       state.tasks.push(action.payload);
     },
@@ -118,7 +111,6 @@ const tasksSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // builder এখন fetchTasksByProjectId হ্যান্ডেল করবে
     builder
       .addCase(fetchTasksByProjectId.pending, (state) => {
         state.status = "loading";
@@ -137,7 +129,7 @@ const tasksSlice = createSlice({
   },
 });
 
-// --- updateTaskStatus অ্যাকশনটি এক্সপোর্ট করা হয়েছে ---
+// --- updateTaskStatus Export here---
 export const {
   updateTaskStatus,
   deleteTaskSuccess,

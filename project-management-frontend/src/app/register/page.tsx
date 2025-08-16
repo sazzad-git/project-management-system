@@ -19,7 +19,7 @@ const SignupPage = () => {
     jobTitle: "",
   });
   
-  // --- নতুন: Confirm Password-এর জন্য স্টেট ---
+  // --- New State for confirm password ---
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [error, setError] = useState<string | null>(null);
@@ -41,14 +41,14 @@ const SignupPage = () => {
     setError(null);
     setSuccess(null);
 
-    // --- নতুন: পাসওয়ার্ড ম্যাচিং চেক ---
+    // --- New Password maching---
     if (formData.password !== confirmPassword) {
       setError("Passwords do not match. Please try again.");
-      return; // যদি পাসওয়ার্ড না মেলে, তাহলে আর এগোবে না
+      return;
     }
 
     try {
-      // API কলে confirmPassword পাঠানো হবে না
+      
       const { ...apiData } = formData;
 
       const response = await fetch("http://localhost:3001/auth/signup", {
@@ -90,7 +90,7 @@ const SignupPage = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* নাম এবং ইমেইল (অপরিবর্তিত) */}
+          {/* Name and emil change */}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">
               Full Name
@@ -120,7 +120,7 @@ const SignupPage = () => {
             />
           </div>
           
-          {/* পাসওয়ার্ড */}
+          {/* Password */}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">
               Password
@@ -137,7 +137,7 @@ const SignupPage = () => {
             />
           </div>
 
-          {/* --- নতুন: Confirm Password ফিল্ড --- */}
+          {/* --- Confirm Password Field --- */}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">
               Confirm Password
@@ -154,7 +154,7 @@ const SignupPage = () => {
             />
           </div>
           
-          {/* রোল এবং জব টাইটেল (অপরিবর্তিত) */}
+          {/* Role and job title */}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">
               Your Role

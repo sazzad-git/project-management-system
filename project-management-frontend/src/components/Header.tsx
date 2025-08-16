@@ -38,13 +38,13 @@ const Header = () => {
     return () => window.removeEventListener("click", closeDropdown);
   }, [isDropdownOpen]);
 
-  // সার্চ সাবমিট করার জন্য হ্যান্ডলার (আপডেটেড টাইপ সহ)
+  
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    // এই লাইনটি পেজ রিলোড হওয়া প্রতিরোধ করে
+   
     e.preventDefault(); 
     
     if (!searchTerm.trim()) {
-      return; // যদি ইনপুট খালি থাকে, তাহলে কিছু করবে না
+      return; 
     }
 
     console.log("Searching for:", searchTerm);
@@ -53,7 +53,7 @@ const Header = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg">
-      {/* বাম অংশ (অপরিবর্তিত) */}
+      {/*Left icon with name */}
       <div className="flex items-center gap-2">
         <FaProjectDiagram className="text-white drop-shadow-md" size={28} />
         <Link
@@ -64,7 +64,7 @@ const Header = () => {
         </Link>
       </div>
 
-      {/* মধ্যম অংশ (আপডেটেড) */}
+      {/* Middle search */}
       <div className="flex flex-1 justify-center px-4">
         <form
           onSubmit={handleSearchSubmit}
@@ -79,12 +79,12 @@ const Header = () => {
             placeholder="Search projects..."
             className="w-full ml-3 bg-transparent border-none text-white placeholder:text-white placeholder:opacity-80 focus:outline-none focus:ring-0"
           />
-          {/* নির্ভরযোগ্য 'Enter' সাবমিশনের জন্য একটি অদৃশ্য বাটন */}
+          
           <button type="submit" className="hidden" aria-hidden="true"></button>
         </form>
       </div>
 
-      {/* ডান অংশ (অপরিবর্তিত) */}
+      {/* Right side */}
       <div className="flex items-center gap-5">
         {isAuthenticated ? (
           <>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { StoreProvider } from "../store/StoreProvider"; // আমাদের তৈরি করা প্রোভাইডার
+import { StoreProvider } from "../store/StoreProvider";
 import Header from "@/components/Header";
 import AuthWrapper from "@/components/AuthWrapper";
 

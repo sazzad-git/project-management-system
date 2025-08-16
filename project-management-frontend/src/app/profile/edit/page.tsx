@@ -54,7 +54,7 @@ const EditProfilePage = () => {
   if (profileData.name) payload.name = profileData.name;
   if (profileData.jobTitle) payload.jobTitle = profileData.jobTitle;
   if (profileData.role) payload.role = profileData.role;
-  // শুধুমাত্র যদি profileImage খালি না থাকে, তাহলেই payload-এ যোগ করুন
+  // Add payload here
   if (profileData.profileImage) {
     payload.profileImage = profileData.profileImage;
   }
@@ -131,7 +131,7 @@ const EditProfilePage = () => {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* প্রোফাইল তথ্য ফর্ম */}
+          {/* Profile Information form */}
           <form
             onSubmit={handleProfileUpdate}
             className="bg-white shadow-lg rounded-2xl p-6 border border-gray-200"
@@ -202,7 +202,7 @@ const EditProfilePage = () => {
             </button>
           </form>
 
-          {/* পাসওয়ার্ড পরিবর্তন ফর্ম */}
+          {/* Password change form */}
           <form
             onSubmit={handlePasswordChange}
             className="bg-white shadow-lg rounded-2xl p-6 border border-gray-200"

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from 'react';
-import { useRouter, useParams } from 'next/navigation'; // useParams ইম্পোর্ট করুন
+import { useRouter, useParams } from 'next/navigation'; 
 import Link from 'next/link';
 
-// কম্পোনেন্টের props থেকে params সরিয়ে দিন
+
 const ResetPasswordPage = () => { 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -12,9 +12,9 @@ const ResetPasswordPage = () => {
   const [error, setError] = useState<string | null>(null);
   
   const router = useRouter();
-  // useParams হুক ব্যবহার করে টোকেনটি নিন
+  
   const params = useParams();
-  const token = params.token as string; // params.token string বা string[] হতে পারে, তাই as string ব্যবহার করা নিরাপদ
+  const token = params.token as string; 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +26,7 @@ const ResetPasswordPage = () => {
     setError(null);
 
     try {
-      // এখানে কোনো পরিবর্তন নেই
+      
       const response = await fetch(`http://localhost:3001/auth/reset-password/${token}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -47,7 +47,7 @@ const ResetPasswordPage = () => {
     }
   };
 
-  // ... বাকি JSX কোড অপরিবর্তিত থাকবে ...
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 p-4">
       <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-8">
@@ -66,7 +66,7 @@ const ResetPasswordPage = () => {
           </p>
         )}
 
-        {!message && ( // যদি সফলতার মেসেজ না থাকে, তাহলেই ফর্ম দেখান
+        {!message && ( 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">
