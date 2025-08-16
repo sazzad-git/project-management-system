@@ -8,7 +8,7 @@ import { UsersService } from '../users/users.service';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private configService: ConfigService,
-    private usersService: UsersService, // UsersService ইনজেক্ট করুন
+    private usersService: UsersService,
   ) {
     const secret = configService.get<string>('JWT_SECRET');
     if (!secret) {
@@ -21,10 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  // JWT টোকেন ভ্যালিডেট করার পর এই মেথডটি চলে
   async validate(payload: { sub: string; email: string }) {
-    // আমরা payload থেকে id দিয়ে ইউজারকে খুঁজে বের করতে পারি
-    // যাতে req.user অবজেক্টে সম্পূর্ণ ইউজার তথ্য থাকে
     const user = await this.usersService.findOneById(payload.sub);
     return user;
   }

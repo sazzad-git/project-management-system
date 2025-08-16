@@ -30,7 +30,7 @@ describe('AuthController', () => {
     expect(controller).toBeDefined();
   });
 
-  // signup এন্ডপয়েন্টের জন্য টেস্ট
+  // signup endpoint test
   describe('signup', () => {
     it('should call authService.signup with the correct data', async () => {
       const createUserDto = {
@@ -58,11 +58,11 @@ describe('AuthController', () => {
     });
   });
 
-  // login এন্ডপয়েন্টের জন্য টেস্ট
+  // login endpoint test
   describe('login', () => {
     it('should call authService.login and return an access token', async () => {
       const user = { id: '1', email: 'test@example.com', role: 'developer' };
-      const req = { user }; // Guard থেকে আসা রিকোয়েস্ট অবজেক্টের মক
+      const req = { user }; // From Guard mock request
       const expectedResult = { access_token: 'mockAccessToken' };
 
       // Arrange

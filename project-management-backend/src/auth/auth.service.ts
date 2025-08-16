@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { MailerService } from '@nestjs-modules/mailer'; // ১. MailerService ইম্পোর্ট করুন
+import { MailerService } from '@nestjs-modules/mailer';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -18,10 +18,10 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private mailerService: MailerService, // ২. MailerService ইনজেক্ট করুন
+    private mailerService: MailerService,
   ) {}
 
-  // signup, validateUser, এবং login মেথডগুলো অপরিবর্তিত থাকবে
+  // signup, validateUser, login
   async signup(createUserDto: CreateUserDto) {
     const { email, password } = createUserDto;
     const existingUser = await this.usersService.findOneByEmail(email);
@@ -49,20 +49,17 @@ export class AuthService {
   async login(user: User) {
     const payload = { email: user.email, sub: user.id, role: user.role };
 
-    // পাসওয়ার্ড ফিল্ডটি রেসপন্স থেকে বাদ দিন
-    const { password, ...userProfile } = user;
+    const { ...userProfile } = user;
     return {
       access_token: this.jwtService.sign(payload),
       user: userProfile,
     };
   }
 
-  // --- forgotPassword মেথডটি এখন ইমেইল পাঠাবে ---
+  // --- forgotPassword method will send email
   async forgotPassword(email: string): Promise<void> {
-    // ৩. এখন আর টোকেন রিটার্ন করবে না
     const user = await this.usersService.findOneByEmail(email);
     if (!user) {
-      // নিরাপত্তা জনিত কারণে, ইউজার না থাকলেও আমরা কোনো এরর দেখাব না
       console.log(`Password reset attempt for non-existent email: ${email}`);
       return;
     }
@@ -77,7 +74,6 @@ export class AuthService {
 
     const resetURL = `http://localhost:3000/reset-password/${resetToken}`;
 
-    // ৪. ইমেইল পাঠানোর লজিক
     try {
       await this.mailerService.sendMail({
         to: user.email,
@@ -93,8 +89,7 @@ export class AuthService {
       console.log(`Password reset email sent to ${user.email}`);
     } catch (error) {
       console.error('Failed to send password reset email:', error);
-      // এখানে ভবিষ্যতে কোনো ফলব্যাক বা রি-ট্রাই লজিক যোগ করা যেতে পারে
-      // আপাতত টোকেনগুলো মুছে দিন যাতে ইউজার আবার চেষ্টা করতে পারে
+
       user.passwordResetToken = null;
       user.passwordResetExpires = null;
       await this.usersService.save(user);
@@ -104,7 +99,7 @@ export class AuthService {
     }
   }
 
-  // resetPassword মেথডটি অপরিবর্তিত থাকবে
+  // resetPassword
   async resetPassword(token: string, newPass: string): Promise<User> {
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
     const user = await this.usersService.findByResetToken(hashedToken);
@@ -121,19 +116,17 @@ export class AuthService {
     user.passwordResetToken = null;
     user.passwordResetExpires = null;
     const updatedUser = await this.usersService.save(user);
-    const { password, ...result } = updatedUser;
+    const { ...result } = updatedUser;
     return result as User;
   }
 
   async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
     const user = await this.usersService.findOneById(userId);
 
-    // UsersService findOneById এখন null রিটার্ন করতে পারে
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    // ১. পুরনো পাসওয়ার্ডটি সঠিক কিনা যাচাই করুন
     const isPasswordMatching = await bcrypt.compare(
       changePasswordDto.currentPassword,
       user.password,
@@ -143,13 +136,11 @@ export class AuthService {
       throw new UnauthorizedException('Incorrect current password.');
     }
 
-    // ২. নতুন পাসওয়ার্ড হ্যাশ করুন
     const hashedNewPassword = await bcrypt.hash(
       changePasswordDto.newPassword,
       10,
     );
 
-    // ৩. ইউজারের পাসওয়ার্ড আপডেট করুন এবং সেভ করুন
     user.password = hashedNewPassword;
     await this.usersService.save(user);
 

@@ -22,7 +22,7 @@ describe('AuthService', () => {
     findOneByEmail: jest.fn(),
     create: jest.fn(),
   };
-  // MailerService-এর জন্য মক যোগ করুন
+  // MailerService
   const mockMailerService = {
     sendMail: jest.fn(),
   };
@@ -45,7 +45,6 @@ describe('AuthService', () => {
     jwtService = module.get<JwtService>(JwtService);
   });
 
-  // প্রতিটি টেস্টের আগে মক ফাংশনগুলো রিসেট করুন
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -54,7 +53,7 @@ describe('AuthService', () => {
     expect(service).toBeDefined();
   });
 
-  // signup মেথডের জন্য টেস্ট
+  // signup
   describe('signup', () => {
     it('should create a new user and return user data without password', async () => {
       const createUserDto = {
@@ -69,9 +68,9 @@ describe('AuthService', () => {
         password: 'hashedPassword',
       };
 
-      // Arrange: findOneByEmail-কে null রিটার্ন করতে বলুন (ইউজার নেই)
+      // Arrange: findOneByEmail-null
       mockUsersService.findOneByEmail.mockResolvedValue(null);
-      // Arrange: create মেথডকে নতুন ইউজার রিটার্ন করতে বলুন
+      // Arrange: create
       mockUsersService.create.mockResolvedValue(createdUser);
 
       // Act
@@ -98,7 +97,7 @@ describe('AuthService', () => {
         role: 'developer',
       };
 
-      // Arrange: findOneByEmail-কে একটি বিদ্যমান ইউজার রিটার্ন করতে বলুন
+      // Arrange: findOneByEmail
       mockUsersService.findOneByEmail.mockResolvedValue({
         id: 'some-id',
         email: 'test@example.com',
@@ -111,7 +110,7 @@ describe('AuthService', () => {
     });
   });
 
-  // validateUser মেথডের জন্য টেস্ট
+  // validateUser
   describe('validateUser', () => {
     it('should return user data without password if credentials are valid', async () => {
       const user: User = {
@@ -167,7 +166,7 @@ describe('AuthService', () => {
     });
   });
 
-  // login মেথডের জন্য টেস্ট
+  // For login Method
   describe('login', () => {
     it('should return an access token and user profile', async () => {
       const user = {
@@ -193,7 +192,7 @@ describe('AuthService', () => {
       const result = await service.login(user);
 
       // Assert
-      expect(result).toEqual(expectedResult); // <-- এখন এটি user অবজেক্টসহ তুলনা করবে
+      expect(result).toEqual(expectedResult);
       expect(mockJwtService.sign).toHaveBeenCalledWith({
         email: user.email,
         sub: user.id,
