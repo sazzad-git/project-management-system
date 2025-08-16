@@ -21,10 +21,9 @@ export class UsersController {
     return this.usersService.updateProfile(userId, updateProfileDto);
   }
 
-  @UseGuards(JwtAuthGuard) // নিশ্চিত করুন যে শুধুমাত্র লগইন করা ইউজাররাই তালিকাটি দেখতে পারে
+  @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {
-    // UsersService-এ একটি findAll মেথড লাগবে যা পাসওয়ার্ড ছাড়া সব ইউজারকে রিটার্ন করে
     return this.usersService.findAll();
   }
 }

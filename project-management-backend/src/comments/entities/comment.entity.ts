@@ -14,14 +14,14 @@ export class Comment {
   id: string;
 
   @Column('text')
-  text: string; // কমেন্টের মূল লেখা
+  text: string;
 
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => User, { eager: true }) // কোন ইউজার কমেন্টটি করেছে
+  @ManyToOne(() => User, { eager: true })
   user: User;
 
-  @ManyToOne(() => Task, (task) => task.comments, { onDelete: 'CASCADE' }) // কোন টাস্কের উপর কমেন্টটি হয়েছে
+  @ManyToOne(() => Task, (task) => task.comments, { onDelete: 'CASCADE' })
   task: Task;
 }

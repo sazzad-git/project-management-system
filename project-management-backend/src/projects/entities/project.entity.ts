@@ -26,12 +26,12 @@ export class Project {
   createdAt: Date;
 
   @ManyToOne(() => User, { eager: true })
-  creator: User; // প্রজেক্টটি কে তৈরি করেছে
+  creator: User;
 
   @ManyToMany(() => User, { eager: true })
   @JoinTable()
-  members: User[]; // প্রজেক্টে কোন কোন সদস্য আছে
+  members: User[];
 
   @OneToMany(() => Task, (task) => task.project)
-  tasks: Task[]; // এই প্রজেক্টের অধীনে থাকা টাস্কগুলো
+  tasks: Task[];
 }

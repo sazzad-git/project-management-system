@@ -5,6 +5,6 @@ import { TasksModule } from '../tasks/tasks.module'; // TasksModule ইম্প
 @Module({
   imports: [forwardRef(() => TasksModule)],
   providers: [EventsGateway],
-  exports: [EventsGateway], // অন্য সার্ভিস থেকে ব্যবহারের জন্য এক্সপোর্ট করুন
+  exports: [EventsGateway],
 })
 export class EventsModule {}

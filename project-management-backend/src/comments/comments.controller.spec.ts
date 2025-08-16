@@ -9,7 +9,7 @@ describe('CommentsController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CommentsController],
       providers: [
-        { provide: CommentsService, useValue: {} }, // CommentsService-কে মক করুন
+        { provide: CommentsService, useValue: {} }, // CommentsService
       ],
     }).compile();
 

@@ -11,8 +11,8 @@ describe('SearchService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SearchService,
-        { provide: getRepositoryToken(Project), useValue: {} }, // ProjectRepository-কে মক করুন
-        { provide: getRepositoryToken(Task), useValue: {} }, // TaskRepository-কে মক করুন
+        { provide: getRepositoryToken(Project), useValue: {} }, // ProjectRepository-Mock
+        { provide: getRepositoryToken(Task), useValue: {} }, // TaskRepository-Mock
       ],
     }).compile();
 

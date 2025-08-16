@@ -54,12 +54,11 @@ import { SearchModule } from './search/search.module';
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
         entities: [User, Task, TaskActivity, Project, Comment],
-        synchronize: true, // ডেভলপমেন্টের জন্য true, প্রোডাকশনে false রাখবেন
+        synchronize: true,
       }),
       inject: [ConfigService],
     }),
 
-    // আপনার ফিচার মডিউলগুলো
     UsersModule,
     TasksModule,
     AuthModule,

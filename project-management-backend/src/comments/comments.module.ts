@@ -8,7 +8,7 @@ import { CommentsService } from './comments.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Comment, Task, User]), // এখন TypeOrmModule, Comment, Task, এবং User-কে চিনতে পারবে
+    TypeOrmModule.forFeature([Comment, Task, User]), //TypeOrmModule, Comment, Task, User- known user
   ],
   controllers: [CommentsController],
   providers: [CommentsService],

@@ -10,7 +10,7 @@ describe('UsersService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
-        { provide: getRepositoryToken(User), useValue: {} }, // UserRepository-কে মক করুন
+        { provide: getRepositoryToken(User), useValue: {} },
       ],
     }).compile();
 

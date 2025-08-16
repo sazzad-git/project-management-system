@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProjectsController } from './projects.controller';
 import { ProjectsService } from './projects.service';
-import { TasksService } from '../tasks/tasks.service'; // TasksService-ও লাগবে
+import { TasksService } from '../tasks/tasks.service';
 
 describe('ProjectsController', () => {
   let controller: ProjectsController;
 
-  const mockProjectsService = {}; // প্রয়োজনীয় মেথডগুলো মক করুন
-  const mockTasksService = {}; // প্রয়োজনীয় মেথডগুলো মক করুন
+  const mockProjectsService = {};
+  const mockTasksService = {};
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

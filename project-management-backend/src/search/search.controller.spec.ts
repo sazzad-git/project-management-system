@@ -9,7 +9,7 @@ describe('SearchController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SearchController],
       providers: [
-        { provide: SearchService, useValue: {} }, // SearchService-কে মক করুন
+        { provide: SearchService, useValue: {} }, // SearchService-Mock
       ],
     }).compile();
 

@@ -11,5 +11,5 @@ export class CreateProjectDto {
 
   @IsArray()
   @IsUUID('4', { each: true })
-  memberIds: string[]; // প্রজেক্ট তৈরির সময় কোন কোন মেম্বারকে যোগ করা হবে
+  memberIds: string[];
 }

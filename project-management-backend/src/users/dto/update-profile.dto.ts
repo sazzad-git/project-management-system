@@ -10,7 +10,7 @@ export class UpdateProfileDto {
   @IsOptional()
   jobTitle?: string;
 
-  @IsUrl() // এটি একটি ভ্যালিড URL কিনা তা যাচাই করবে
+  @IsUrl()
   @IsOptional()
   profileImage?: string;
 

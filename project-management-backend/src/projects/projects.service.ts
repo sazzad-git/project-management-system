@@ -19,7 +19,7 @@ export class ProjectsService {
     private projectsRepository: Repository<Project>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    private dataSource: DataSource, // DataSource ইনজেক্ট করুন
+    private dataSource: DataSource,
   ) {}
 
   async create(
@@ -62,18 +62,16 @@ export class ProjectsService {
       .getMany();
   }
 
-  // --- সমাধানটি এখানে: এই নতুন মেথডটি যোগ করুন ---
   async findOne(id: string, user: User): Promise<Project> {
     const project = await this.projectsRepository.findOne({
       where: { id },
-      relations: ['creator', 'members', 'tasks'], // tasks-ও লোড করতে পারেন
+      relations: ['creator', 'members', 'tasks'],
     });
 
     if (!project) {
       throw new NotFoundException(`Project with ID "${id}" not found.`);
     }
 
-    // পারমিশন চেক: ইউজার কি Admin অথবা এই প্রজেক্টের সদস্য?
     const isMember = project.members.some((member) => member.id === user.id);
 
     if (user.role !== UserRole.ADMIN && !isMember) {
@@ -85,7 +83,7 @@ export class ProjectsService {
     return project;
   }
 
-  // --- নতুন: update মেথড ---
+  // --- update Method ---
   async update(
     id: string,
     updateProjectDto: UpdateProjectDto,
@@ -96,7 +94,6 @@ export class ProjectsService {
       throw new NotFoundException(`Project with ID "${id}" not found.`);
     }
 
-    // পারমিশন চেক: শুধুমাত্র Admin অথবা প্রজেক্টের স্রষ্টা (Creator) প্রজেক্ট এডিট করতে পারবে
     if (user.role !== UserRole.ADMIN && project.creator.id !== user.id) {
       throw new UnauthorizedException(
         'You do not have permission to edit this project.',
@@ -105,10 +102,8 @@ export class ProjectsService {
 
     const { memberIds, ...projectDetails } = updateProjectDto;
 
-    // নাম এবং ডেসক্রিপশন আপডেট করুন
     Object.assign(project, projectDetails);
 
-    // মেম্বারদের তালিকা আপডেট করুন (যদি পাঠানো হয়)
     if (memberIds) {
       const newMembers = await this.usersRepository.findBy({
         id: In(memberIds),
@@ -119,14 +114,13 @@ export class ProjectsService {
     return this.projectsRepository.save(project);
   }
 
-  // remove মেথড (চূড়ান্ত সমাধান - Transaction সহ)
+  // remove
   async remove(id: string, user: User): Promise<{ message: string }> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      // ট্রানজ্যাকশনের মধ্যে Repository ব্যবহার করুন
       const projectRepo = queryRunner.manager.getRepository(Project);
       const taskRepo = queryRunner.manager.getRepository(Task);
       const activityRepo = queryRunner.manager.getRepository(TaskActivity);
@@ -139,26 +133,22 @@ export class ProjectsService {
         throw new NotFoundException(`Project with ID "${id}" not found.`);
       }
 
-      // পারমিশন চেক
       if (user.role !== UserRole.ADMIN && project.creator.id !== user.id) {
         throw new UnauthorizedException(
           'You do not have permission to delete this project.',
         );
       }
 
-      // ১. প্রথমে প্রতিটি টাস্কের সাথে সম্পর্কিত সব অ্যাক্টিভিটি ডিলিট করুন
       for (const task of project.tasks) {
         if (task.activities && task.activities.length > 0) {
           await activityRepo.remove(task.activities);
         }
       }
 
-      // ২. এরপর প্রজেক্টের সাথে সম্পর্কিত সব টাস্ক ডিলিট করুন
       if (project.tasks && project.tasks.length > 0) {
         await taskRepo.remove(project.tasks);
       }
 
-      // ৩. সবশেষে, মূল প্রজেক্টটিকে ডিলিট করুন
       await projectRepo.remove(project);
 
       await queryRunner.commitTransaction();
@@ -178,19 +168,15 @@ export class ProjectsService {
     }
   }
 
-  // getGanttData মেথড (চূড়ান্ত এবং সঠিক সংস্করণ)
   async getGanttData(
     projectId: string,
     user: User,
   ): Promise<{ data: any[]; links: any[] }> {
-    // findOne মেথডটি পারমিশন চেক করে, তাই এটি ব্যবহার করা ভালো
     const project = await this.findOne(projectId, user);
 
-    // findOne ইতিমধ্যেই relations: ['tasks'] লোড করে (যদি কনফিগার করা থাকে),
-    // না হলে আবার লোড করুন।
     const projectWithTasks = await this.projectsRepository.findOne({
       where: { id: projectId },
-      relations: ['tasks'], // নিশ্চিত করুন যে টাস্কগুলো লোড হচ্ছে
+      relations: ['tasks'],
     });
 
     if (!projectWithTasks) {
@@ -199,33 +185,29 @@ export class ProjectsService {
       );
     }
 
-    // dhtmlx-gantt-এর ফরম্যাট অনুযায়ী টাস্ক ডেটা তৈরি করুন
     const data = projectWithTasks.tasks
-      .filter((task) => task.startDate && task.duration != null) // শুধুমাত্র ভ্যালিড ডেটা সহ টাস্ক নিন
+      .filter((task) => task.startDate && task.duration != null)
       .map((task) => ({
         id: task.id,
         text: task.title,
-        start_date: task.startDate.toISOString().split('T')[0], // YYYY-MM-DD ফরম্যাট
+        start_date: task.startDate.toISOString().split('T')[0], // YYYY-MM-DD Format
         duration: task.duration,
-        progress: 0.5, // আপনি চাইলে progress-ও ট্র্যাক করতে পারেন
-        // parent: 0, // আপনি চাইলে সাব-টাস্ক যোগ করতে পারেন
+        progress: 0.5,
       }));
 
-    // dhtmlx-gantt-এর ফরম্যাট অনুযায়ী লিংকের (dependency) ডেটা তৈরি করুন
     const links: any[] = [];
     projectWithTasks.tasks.forEach((task) => {
       if (task.dependencies && task.dependencies.length > 0) {
         task.dependencies.forEach((depId) => {
-          // নিশ্চিত করুন যে সোর্স এবং টার্গেট উভয় টাস্কই `data` অ্যারেতে আছে
           if (
             data.some((d) => d.id === depId) &&
             data.some((d) => d.id === task.id)
           ) {
             links.push({
-              id: `${depId}-${task.id}`, // একটি ইউনিক আইডি
-              source: depId, // যে টাস্কের উপর নির্ভরশীল
-              target: task.id, // যে টাস্কটি নির্ভরশীল
-              type: '0', // '0' মানে Finish to Start
+              id: `${depId}-${task.id}`,
+              source: depId,
+              target: task.id,
+              type: '0',
             });
           }
         });

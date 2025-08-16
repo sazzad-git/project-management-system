@@ -11,7 +11,7 @@ import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:3000', // আপনার ফ্রন্টএন্ডের URL
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -59,8 +59,6 @@ export class EventsGateway
   }
 
   /**
-   * একটি নির্দিষ্ট প্রজেক্ট রুমে টাস্ক আপডেটের ইভেন্ট পাঠানোর জন্য একটি পাবলিক মেথড।
-   * এই মেথডটি অন্যান্য সার্ভিস (যেমন TasksService) থেকে কল করা হবে।
    * @param projectId - The ID of the project room to emit the event to.
    * @param updatedTask - The updated task data to send.
    */

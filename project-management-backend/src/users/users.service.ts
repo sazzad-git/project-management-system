@@ -44,19 +44,17 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    // DTO থেকে পাওয়া ডেটা দিয়ে ইউজার অবজেক্ট আপডেট করুন
     Object.assign(user, updateProfileDto);
 
     const updatedUser = await this.save(user);
-    // পাসওয়ার্ড ছাড়া ইউজার তথ্য রিটার্ন করুন
+
     const { password, ...result } = updatedUser;
     return result as User;
   }
 
-  // --- এই নতুন মেথডটি যোগ করুন ---
   async findAll(): Promise<Omit<User, 'password'>[]> {
     return this.usersRepository.find({
-      select: ['id', 'name', 'email', 'role', 'jobTitle', 'profileImage'], // পাসওয়ার্ড ফিল্ডটি বাদ দিন
+      select: ['id', 'name', 'email', 'role', 'jobTitle', 'profileImage'],
     });
   }
 }
