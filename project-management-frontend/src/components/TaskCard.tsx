@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store/store';
 import { updateTaskStatus, deleteTaskSuccess } from '../store/features/tasks/tasksSlice'; 
 import { Task } from '../store/features/tasks/tasksSlice';
-import { FaEdit } from 'react-icons/fa';
+import { FaEdit, FaComments } from 'react-icons/fa'; // FaComments আইকন ইম্পোর্ট করুন
 import Link from 'next/link';
 
 const columnTitles: { [key: string]: string } = {
@@ -13,7 +13,6 @@ const columnTitles: { [key: string]: string } = {
   done: 'Done',
 };
 
-// Props-এর টাইপ আপডেট করুন (onCardClick আর প্রয়োজন নেই)
 interface TaskCardProps {
   task: Task;
   onEditClick: (task: Task) => void;
@@ -44,7 +43,7 @@ const TaskCard = ({ task, onEditClick }: TaskCardProps) => {
   };
   
   const handleDelete = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // Link-এর নেভিগেশন প্রতিরোধ করুন
+    e.stopPropagation();
     if (!canDeleteTask || !confirm('Are you sure you want to delete this task?')) {
       return;
     }
@@ -54,7 +53,6 @@ const TaskCard = ({ task, onEditClick }: TaskCardProps) => {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
       });
-
       if (response.ok) {
         dispatch(deleteTaskSuccess(task.id));
       } else {
@@ -81,10 +79,14 @@ const TaskCard = ({ task, onEditClick }: TaskCardProps) => {
     (user?.role === 'project_manager' && task.creator?.id === user.id) ||
     task.assignees?.some(a => a.id === user.id);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null | undefined): string => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric', month: 'short', day: 'numeric',
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid Date';
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
     });
   };
 
@@ -96,11 +98,9 @@ const TaskCard = ({ task, onEditClick }: TaskCardProps) => {
     <div className="p-3 mb-3 rounded-lg shadow-sm bg-white border border-gray-200 flex flex-col justify-between min-h-[220px]">
       <div>
         <div className="flex justify-between items-start gap-2">
-          {/* টাস্কের টাইটেলকে এখন একটি লিংক বানানো হয়েছে */}
           <Link href={`/projects/${task.project?.id}/tasks/${task.id}`} className="block">
             <p className="font-semibold text-gray-800 break-words hover:text-blue-600 transition">{task.title}</p>
           </Link>
-          
           <div className="flex items-center gap-2 flex-shrink-0">
             {canEditTask && (
               <button 
@@ -111,7 +111,6 @@ const TaskCard = ({ task, onEditClick }: TaskCardProps) => {
                 <FaEdit />
               </button>
             )}
-
             {canDeleteTask && (
               <button 
                 onClick={handleDelete}
@@ -130,6 +129,7 @@ const TaskCard = ({ task, onEditClick }: TaskCardProps) => {
         <div className="flex justify-between items-center mt-2">
           <div className="text-xs text-gray-500 space-y-1">
             <p><strong>Assigned:</strong> {task.assignees?.map(a => a.name).join(', ') || 'N/A'}</p>
+            <p><strong>By:</strong> {task.creator?.name || 'N/A'}</p>
           </div>
           {canUpdateStatus ? (
             <select 
@@ -141,22 +141,34 @@ const TaskCard = ({ task, onEditClick }: TaskCardProps) => {
               <option value="in_progress">In Progress</option>
               <option value="done">Done</option>
             </select>
-          ) : (<span className="text-xs font-medium bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-      {columnTitles[task.status]}
-    </span>)}
+          ) : (
+            <span className="text-xs font-medium bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+              {columnTitles[task.status]}
+            </span>
+          )}
         </div>
 
-        {/* --- নতুন: View Details বাটন এবং কমেন্ট সংখ্যা --- */}
-        <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center">
-          <Link 
-            href={`/projects/${task.project?.id}/tasks/${task.id}`}
-            className="text-sm text-blue-600 hover:underline font-medium"
-          >
-            Details & Comments
-          </Link>
-          <span className="text-xs text-gray-500">
-            {task.comments?.length || 0} Comments
-          </span>
+        {/* --- Activity এবং Comments সেকশন --- */}
+        <div className="mt-4 pt-3 border-t border-gray-100">
+          <div className="flex justify-between items-center text-xs text-gray-400">
+            <span>Created: {formatDate(task.createdAt)}</span>
+            
+            <Link 
+              href={`/projects/${task.project?.id}/tasks/${task.id}`}
+              className="flex items-center gap-1 text-blue-600 hover:underline"
+              onClick={(e) => e.stopPropagation()}
+              title="View comments"
+            >
+              <FaComments className='text-3xl' />
+              <span>{task.comments?.length || 0}</span>
+            </Link>
+          </div>
+          
+          {lastActivity && (
+            <p className="text-xs text-gray-500 italic mt-1 truncate" title={lastActivity.description}>
+              {lastActivity.description}
+            </p>
+          )}
         </div>
       </div>
     </div>

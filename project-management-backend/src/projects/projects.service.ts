@@ -178,40 +178,56 @@ export class ProjectsService {
     }
   }
 
+  // getGanttData মেথড (চূড়ান্ত এবং সঠিক সংস্করণ)
   async getGanttData(
     projectId: string,
     user: User,
   ): Promise<{ data: any[]; links: any[] }> {
-    // প্রথমে প্রজেক্টটি খুঁজে বের করে পারমিশন চেক করুন
-    await this.findOne(projectId, user);
+    // findOne মেথডটি পারমিশন চেক করে, তাই এটি ব্যবহার করা ভালো
+    const project = await this.findOne(projectId, user);
 
-    const project = await this.projectsRepository.findOne({
+    // findOne ইতিমধ্যেই relations: ['tasks'] লোড করে (যদি কনফিগার করা থাকে),
+    // না হলে আবার লোড করুন।
+    const projectWithTasks = await this.projectsRepository.findOne({
       where: { id: projectId },
-      relations: ['tasks'],
+      relations: ['tasks'], // নিশ্চিত করুন যে টাস্কগুলো লোড হচ্ছে
     });
 
-    if (!project) throw new NotFoundException('Project not found');
+    if (!projectWithTasks) {
+      throw new NotFoundException(
+        'Project not found or tasks could not be loaded.',
+      );
+    }
 
-    const data = project.tasks
-      .filter((task) => task.startDate && task.duration != null)
+    // dhtmlx-gantt-এর ফরম্যাট অনুযায়ী টাস্ক ডেটা তৈরি করুন
+    const data = projectWithTasks.tasks
+      .filter((task) => task.startDate && task.duration != null) // শুধুমাত্র ভ্যালিড ডেটা সহ টাস্ক নিন
       .map((task) => ({
         id: task.id,
         text: task.title,
-        start_date: task.startDate.toISOString().split('T')[0],
+        start_date: task.startDate.toISOString().split('T')[0], // YYYY-MM-DD ফরম্যাট
         duration: task.duration,
-        progress: 0, // ডিফল্ট ভ্যালু
+        progress: 0.5, // আপনি চাইলে progress-ও ট্র্যাক করতে পারেন
+        // parent: 0, // আপনি চাইলে সাব-টাস্ক যোগ করতে পারেন
       }));
 
+    // dhtmlx-gantt-এর ফরম্যাট অনুযায়ী লিংকের (dependency) ডেটা তৈরি করুন
     const links: any[] = [];
-    project.tasks.forEach((task) => {
+    projectWithTasks.tasks.forEach((task) => {
       if (task.dependencies && task.dependencies.length > 0) {
         task.dependencies.forEach((depId) => {
-          links.push({
-            id: `${depId}-${task.id}`,
-            source: depId,
-            target: task.id,
-            type: '0',
-          });
+          // নিশ্চিত করুন যে সোর্স এবং টার্গেট উভয় টাস্কই `data` অ্যারেতে আছে
+          if (
+            data.some((d) => d.id === depId) &&
+            data.some((d) => d.id === task.id)
+          ) {
+            links.push({
+              id: `${depId}-${task.id}`, // একটি ইউনিক আইডি
+              source: depId, // যে টাস্কের উপর নির্ভরশীল
+              target: task.id, // যে টাস্কটি নির্ভরশীল
+              type: '0', // '0' মানে Finish to Start
+            });
+          }
         });
       }
     });
