@@ -69,7 +69,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/your-repo-name.git
+    git clone https://github.com/sazzad-git/project-management-system.git
     cd your-repo-name
     ```
 
