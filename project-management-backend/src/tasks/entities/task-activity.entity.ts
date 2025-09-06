@@ -14,14 +14,14 @@ export class TaskActivity {
   id: string;
 
   @Column('text')
-  description: string; // যেমন: "Sazzad changed status from To Do to In Progress"
+  description: string;
 
-  @CreateDateColumn() // TypeORM স্বয়ংক্রিয়ভাবে তৈরির সময় সেট করবে
+  @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => User, { eager: true }) // কোন ইউজার পরিবর্তনটি করেছে
+  @ManyToOne(() => User, { eager: true })
   user: User;
 
-  @ManyToOne(() => Task, (task) => task.activities) // কোন টাস্কের উপর পরিবর্তনটি হয়েছে
+  @ManyToOne(() => Task, (task) => task.activities)
   task: Task;
 }

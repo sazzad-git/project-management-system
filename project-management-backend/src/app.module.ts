@@ -25,7 +25,7 @@ import { SearchModule } from './search/search.module';
 
     MailerModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         transport: {
           host: configService.get<string>('MAIL_HOST'),
           secure: true, // true for 465, false for other ports
